@@ -4,7 +4,7 @@ import {LoadingSpinner} from '../loading-spinner/loading-spinner';
 import {EmptyState} from '../empty-state/empty-state';
 import {Pagination} from '../pagination/pagination';
 import {SearchFilter} from '../search-filter/search-filter';
-import {DataTableColumn} from '../../models/ui.models';
+import type {DataTableColumn} from '../../models/ui.models';
 type SortDirection='asc'|'desc';
 @Component({selector:'app-data-table',standalone:true,imports:[StatusBadge,LoadingSpinner,EmptyState,Pagination,SearchFilter],template:`
 @if(loading()){<app-loading-spinner label="Loading records…"/>}
