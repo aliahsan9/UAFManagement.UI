@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable,inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { CreateFeeHeadRequest,CreateFeeStructureRequest,CreatedResource,FeeStructureDraft,GenerateFeeChallanRequest,RecordFeePaymentRequest,StudentFeeAccount,VerifyFeePaymentRequest } from './finance.models';
+import { CreateFeeHeadRequest,CreateFeeStructureRequest,CreatedResource,GenerateFeeChallanRequest,RecordFeePaymentRequest,StudentFeeAccount,VerifyFeePaymentRequest } from './finance.models';
 export interface FinanceDashboardAnalytics { generatedAtUtc:string; students:{total:number;active:number}; finance:{outstandingBalance:number;currency:string}; }
 @Injectable({providedIn:'root'})
 export class FinanceService {
