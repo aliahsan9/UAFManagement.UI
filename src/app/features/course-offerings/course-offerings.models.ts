@@ -32,7 +32,7 @@ export const ENROLLMENT_STATUS_OPTIONS=[
 export function offeringStatusValue(value:CourseOffering['status']):CourseOfferingStatus {
  if(typeof value==='number')return value as CourseOfferingStatus;
  const v=String(value).toLowerCase();
- return ({draft:1,published:2,closed:3,cancelled:4}[v]??Number(v)||1) as CourseOfferingStatus;
+ return ({draft:1,published:2,closed:3,cancelled:4}[v]??(Number(v)||1)) as CourseOfferingStatus;
 }
 export function offeringStatusLabel(value:CourseOffering['status']):string {
  return ({1:'Draft',2:'Published',3:'Closed',4:'Cancelled'} as Record<number,string>)[offeringStatusValue(value)]??'Unknown';
@@ -43,7 +43,7 @@ export function offeringStatusClass(value:CourseOffering['status']):string {
 export function enrollmentStatusValue(value:CourseEnrollment['status']):EnrollmentStatus {
  if(typeof value==='number')return value as EnrollmentStatus;
  const v=String(value).toLowerCase();
- return ({enrolled:1,dropped:2,completed:3,withdrawn:4}[v]??Number(v)||0) as EnrollmentStatus;
+ return ({enrolled:1,dropped:2,completed:3,withdrawn:4}[v]??(Number(v)||0)) as EnrollmentStatus;
 }
 export function enrollmentStatusLabel(value:CourseEnrollment['status']):string {
  return ({1:'Enrolled',2:'Dropped',3:'Completed',4:'Withdrawn'} as Record<number,string>)[enrollmentStatusValue(value)]??'Unknown';
