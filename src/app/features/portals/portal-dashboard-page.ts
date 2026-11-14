@@ -43,7 +43,7 @@ const PORTALS:Record<string,{eyebrow:string;title:string;description:string;link
   @for(link of links();track link.path){<div class="col-12 col-md-6 col-xl-4"><a class="card h-100 border-0 shadow-sm text-decoration-none portal-module-card" [routerLink]="link.path"><div class="card-body p-4"><div class="d-flex align-items-center justify-content-between mb-3"><span class="rounded-3 bg-primary-subtle text-primary fw-bold px-3 py-2">{{link.icon}}</span><span class="text-primary">Open →</span></div><h2 class="h6 fw-bold text-body">{{link.title}}</h2><p class="small text-secondary mb-0">{{link.description}}</p></div></a></div>}
   @empty {<div class="col-12"><div class="alert alert-info">{{portal().emptyMessage??'No modules are assigned to this account yet. Contact your system administrator if you believe this is incorrect.'}}</div></div>}
  </div>
- <div class="small text-secondary mt-4">Available modules are calculated from the role and permission mapping returned by the university's authentication system. API authorization is enforced independently by the backend.</div>
+ <div class="small text-secondary mt-4">Available modules are calculated using a frontend mirror of the backend role-to-permission mapping. API authorization is enforced independently by the backend.</div>
 </section>`})
 export class PortalDashboardPage {
  private readonly route=inject(ActivatedRoute);private readonly access=inject(AccessControlService);
