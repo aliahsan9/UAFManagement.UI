@@ -4,6 +4,7 @@ import { Router, RouterLink } from '@angular/router';
 import { finalize } from 'rxjs';
 import { AuthService } from '../../../core/services/auth.service';
 import { NotificationService } from '../../../core/services/notification.service';
+import { portalHomeFor } from '../../../core/authorization/portal-home';
 @Component({
  selector:'app-register',standalone:true,imports:[ReactiveFormsModule,RouterLink],
  template:`<div class="auth-card"><div class="auth-mobile-brand"><span class="brand__mark">U</span><strong>UAF Management</strong></div>
@@ -28,7 +29,7 @@ export class Register {
   if(this.form.invalid||this.loading()){this.form.markAllAsTouched();return;}
   this.loading.set(true);this.errorMessage.set('');
   this.auth.register(this.form.getRawValue()).pipe(finalize(()=>this.loading.set(false))).subscribe({
-   next:()=>{this.notices.show('Your account has been created.','success');void this.router.navigateByUrl('/dashboard');},
+   next:user=>{this.notices.show('Your account has been created.','success');void this.router.navigateByUrl(portalHomeFor(user));},
    error:e=>this.errorMessage.set(e.error?.error??e.error?.detail??'Registration could not be completed. Please try again.')
   });
  }
