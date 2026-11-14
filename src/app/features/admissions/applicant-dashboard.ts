@@ -1,0 +1,17 @@
+import { Component, inject, signal } from '@angular/core';
+import { RouterLink } from '@angular/router';
+import { finalize } from 'rxjs';
+import { AdmissionsService } from './admissions.service';
+import { AdmissionApplication, AdmissionStatus, admissionStatusLabel } from './admissions.models';
+import { AuthService } from '../../core/services/auth.service';
+
+@Component({selector:'app-applicant-dashboard',standalone:true,imports:[RouterLink],
+ template:`<div class="page-heading"><div><span class="eyebrow">APPLICANT PORTAL</span><h1>Welcome, {{auth.currentUser()?.fullName??'Applicant'}}</h1><p>Track your admission applications and complete any outstanding steps.</p></div><a routerLink="/applicant/applications/new" class="btn btn--primary">Start application <span>→</span></a></div>@if(loading()){<div class="text-muted small py-5">Loading your applications…</div>}@else{<div class="row g-3 mb-4"><div class="col-md-4"><div class="card border-0 shadow-sm p-3"><span class="text-muted small">Total applications</span><strong class="display-6">{{applications().length}}</strong></div></div><div class="col-md-4"><div class="card border-0 shadow-sm p-3"><span class="text-muted small">Drafts in progress</span><strong class="display-6">{{count(AdmissionStatus.Draft)}}</strong></div></div><div class="col-md-4"><div class="card border-0 shadow-sm p-3"><span class="text-muted small">Awaiting decision</span><strong class="display-6">{{count(AdmissionStatus.Submitted)+count(AdmissionStatus.UnderReview)}}</strong></div></div></div><section class="card border-0 shadow-sm"><div class="card-header bg-white py-3 d-flex justify-content-between"><strong>Recent applications</strong><a routerLink="/applicant/applications" class="small">View all</a></div>@if(applications().length){<div class="table-responsive"><table class="table align-middle mb-0"><thead><tr><th>Application</th><th>Program ID</th><th>Submitted</th><th>Status</th><th></th></tr></thead><tbody>@for(app of applications().slice(0,5);track app.id){<tr><td><strong>{{app.applicationNumber}}</strong><small class="d-block text-muted">{{app.applicantFullName}}</small></td><td>{{app.academicProgramId}}</td><td>{{app.applicationDate}}</td><td><span class="badge rounded-pill text-bg-light">{{statusLabel(app.status)}}</span></td><td><a [routerLink]="['/applicant/applications',app.id]" class="btn btn-sm btn-outline-primary">Open</a></td></tr>}</tbody></table></div>}@else{<div class="p-5 text-center"><h5>No applications yet</h5><p class="text-muted small">Create an application to begin your admission journey.</p><a routerLink="/applicant/applications/new" class="btn btn-primary">Create application</a></div>}</section>}`})
+export class ApplicantDashboard {
+ private service=inject(AdmissionsService);readonly auth=inject(AuthService);readonly loading=signal(true);readonly applications=signal<AdmissionApplication[]>([]);
+ readonly AdmissionStatus=AdmissionStatus;
+ constructor(){this.load();}
+ load():void{this.loading.set(true);this.service.getMyApplications().pipe(finalize(()=>this.loading.set(false))).subscribe({next:x=>this.applications.set(x),error:()=>this.applications.set([])});}
+ count(status:AdmissionStatus):number{return this.applications().filter(x=>x.status===status).length;}
+ statusLabel(status:AdmissionStatus):string{return admissionStatusLabel(status);}
+}
