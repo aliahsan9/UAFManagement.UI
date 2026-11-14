@@ -1,4 +1,4 @@
-import { Component, DestroyRef, OnInit, inject, signal } from '@angular/core';
+import { Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
@@ -12,10 +12,11 @@ import { NotificationService } from '../../core/services/notification.service';
  selector:'app-courses-page',standalone:true,imports:[ReactiveFormsModule],
  template:`
  <section class="container-fluid px-0">
-  <div class="d-flex flex-wrap align-items-end justify-content-between gap-3 mb-4"><div><div class="text-uppercase small fw-semibold text-primary mb-2">Academic catalog / Curriculum</div><h1 class="h3 fw-bold mb-1">Courses</h1><p class="text-secondary mb-0">Maintain the university course catalogue and department ownership.</p></div><button class="btn btn-primary" type="button" (click)="openCreate()">Create course</button></div>
+  <div class="d-flex flex-wrap align-items-end justify-content-between gap-3 mb-4"><div><div class="text-uppercase small fw-semibold text-primary mb-2">Academic catalog / Curriculum</div><h1 class="h3 fw-bold mb-1">Courses</h1><p class="text-secondary mb-0">Maintain the university course catalogue and department ownership.</p></div><button class="btn btn-primary" type="button" (click)="openCreate()" [disabled]="!departmentsLoaded() || !activeDepartments().length">Create course</button></div>
   @if(error()){<div class="alert alert-danger d-flex justify-content-between align-items-center" role="alert"><span>{{error()}}</span><button class="btn btn-sm btn-outline-danger" (click)="load()">Retry</button></div>}
+  @if(departmentsError()){<div class="alert alert-warning d-flex flex-wrap justify-content-between align-items-center gap-2" role="alert"><span>{{departmentsError()}} Course department lookup requires the academic-structure.manage permission.</span><button class="btn btn-sm btn-outline-warning" type="button" (click)="loadDepartments()">Retry department lookup</button></div>}
   <div class="card border-0 shadow-sm"><div class="card-header bg-white border-0 px-4 pt-4"><div class="d-flex flex-wrap justify-content-between align-items-center gap-3"><div><h2 class="h6 fw-bold mb-1">Course catalogue</h2><p class="small text-secondary mb-0">Filter by owning department and activation state.</p></div>
-   <div class="d-flex flex-wrap gap-2"><select class="form-select form-select-sm" aria-label="Filter by department" style="min-width:190px" [value]="departmentFilter()" (change)="changeDepartment($any($event.target).value)"><option value="">All departments</option>@for(d of departments();track d.id){<option [value]="d.id">{{d.name}} ({{d.code}})</option>}</select><select class="form-select form-select-sm" aria-label="Filter by active state" style="min-width:145px" [value]="activeFilter()" (change)="changeActive($any($event.target).value)"><option value="">All states</option><option value="true">Active</option><option value="false">Inactive</option></select><button class="btn btn-sm btn-outline-secondary" type="button" (click)="load()" [disabled]="loading()">Refresh</button></div>
+   <div class="d-flex flex-wrap gap-2"><select class="form-select form-select-sm" aria-label="Filter by department" style="min-width:190px" [value]="departmentFilter()" [disabled]="!departmentsLoaded()" (change)="changeDepartment($any($event.target).value)"><option value="">All departments</option>@for(d of departments();track d.id){<option [value]="d.id">{{d.name}} ({{d.code}})</option>}</select><select class="form-select form-select-sm" aria-label="Filter by active state" style="min-width:145px" [value]="activeFilter()" (change)="changeActive($any($event.target).value)"><option value="">All states</option><option value="true">Active</option><option value="false">Inactive</option></select><button class="btn btn-sm btn-outline-secondary" type="button" (click)="load()" [disabled]="loading()">Refresh</button></div>
   </div></div><div class="card-body px-4 pb-4">
    @if(loading()){<div class="text-center py-5 text-secondary"><span class="spinner-border spinner-border-sm me-2"></span>Loading courses…</div>}
    @else{<div class="table-responsive"><table class="table table-hover align-middle mb-0"><thead class="table-light"><tr><th>Course code</th><th>Course title</th><th>Department</th><th>Credit hours</th><th>Status</th><th class="text-end">Actions</th></tr></thead><tbody>
@@ -33,7 +34,7 @@ import { NotificationService } from '../../core/services/notification.service';
    <div class="col-md-4"><label class="form-label" for="course-code">Course code</label><input id="course-code" class="form-control text-uppercase" formControlName="code" maxlength="30" placeholder="e.g. CSC-101">@if(form.controls.code.touched&&form.controls.code.invalid){<div class="text-danger small">Course code is required (maximum 30 characters).</div>}</div>
    <div class="col-md-8"><label class="form-label" for="course-title">Course title</label><input id="course-title" class="form-control" formControlName="title" maxlength="180" placeholder="e.g. Introduction to Programming">@if(form.controls.title.touched&&form.controls.title.invalid){<div class="text-danger small">Course title is required (maximum 180 characters).</div>}</div>
    <div class="col-md-4"><label class="form-label" for="course-credit">Credit hours</label><input id="course-credit" class="form-control" type="number" min="0.01" max="10" step="0.01" formControlName="creditHours">@if(form.controls.creditHours.touched&&form.controls.creditHours.invalid){<div class="text-danger small">Credit hours must be greater than 0 and no more than 10.</div>}</div>
-   <div class="col-12"><label class="form-label" for="course-description">Description <span class="text-secondary">(optional)</span></label><textarea id="course-description" class="form-control" rows="3" formControlName="description" maxlength="2000" placeholder="Brief course overview"></textarea></div>
+   <div class="col-12"><label class="form-label" for="course-description">Description <span class="text-secondary">(optional)</span></label><textarea id="course-description" class="form-control" rows="3" formControlName="description" maxlength="1000" placeholder="Brief course overview"></textarea></div>
   </div></div><div class="modal-footer"><button class="btn btn-outline-secondary" type="button" (click)="closeForm()">Cancel</button><button class="btn btn-primary" type="submit" [disabled]="saving()">{{saving()?'Saving…':(editingId()?'Save changes':'Create course')}}</button></div></form>
  </div></div></div>}
 
@@ -52,6 +53,8 @@ export class CoursesPage implements OnInit {
  private readonly notifications=inject(NotificationService);
  readonly courses=signal<Course[]>([]);
  readonly departments=signal<DepartmentOption[]>([]);
+ readonly departmentsLoaded=signal(false);
+ readonly departmentsError=signal('');
  readonly loading=signal(false);
  readonly saving=signal(false);
  readonly error=signal('');
@@ -61,21 +64,25 @@ export class CoursesPage implements OnInit {
  readonly detailsLoading=signal(false);
  readonly departmentFilter=signal('');
  readonly activeFilter=signal('');
- readonly activeDepartments=()=>this.departments().filter(x=>x.isActive);
+ readonly activeDepartments=computed(()=>this.departments().filter(x=>x.isActive));
  readonly form=this.fb.group({
   departmentId:['',Validators.required],
   code:['',[Validators.required,Validators.maxLength(30)]],
   title:['',[Validators.required,Validators.maxLength(180)]],
-  creditHours:[3,[Validators.required,Validators.min(0.0001),Validators.max(10)]],
-  description:['',Validators.maxLength(2000)]
+  creditHours:[3,[Validators.required,Validators.min(0.01),Validators.max(10)]],
+  description:['',Validators.maxLength(1000)]
  });
 
  ngOnInit():void {
-  this.structure.getDepartments().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-   next:items=>this.departments.set(items),
-   error:err=>this.notifications.show(this.errorMessage(err),'error')
-  });
+  this.loadDepartments();
   this.load();
+ }
+ loadDepartments():void {
+  this.departmentsError.set('');
+  this.structure.getDepartments().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+   next:items=>{this.departments.set(items);this.departmentsLoaded.set(true);},
+   error:err=>{this.departmentsLoaded.set(false);this.departmentsError.set(this.errorMessage(err));}
+  });
  }
  load():void {
   this.loading.set(true);this.error.set('');
@@ -88,7 +95,7 @@ export class CoursesPage implements OnInit {
  }
  changeDepartment(value:string):void{this.departmentFilter.set(value);this.load();}
  changeActive(value:string):void{this.activeFilter.set(value);this.load();}
- departmentName(id:string):string{return this.departments().find(x=>x.id===id)?.name??'Unknown department';}
+ departmentName(id:string):string{return this.departments().find(x=>x.id===id)?.name??id;}
  openCreate():void{
   this.editingId.set(null);this.form.reset({departmentId:'',code:'',title:'',creditHours:3,description:''});
   this.form.controls.departmentId.enable();this.formOpen.set(true);
