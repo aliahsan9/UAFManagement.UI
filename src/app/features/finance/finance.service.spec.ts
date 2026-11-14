@@ -8,7 +8,7 @@ describe('FinanceService API contracts',()=>{
  let service:FinanceService;let http:HttpTestingController;const base=environment.apiBaseUrl+'/api/v1/finance';
  beforeEach(()=>{TestBed.configureTestingModule({providers:[provideHttpClient(),provideHttpClientTesting()]});service=TestBed.inject(FinanceService);http=TestBed.inject(HttpTestingController);});
  afterEach(()=>http.verify());
- it('creates fee heads and fee structures with backend request shapes',()=>{
+ it('loads the university analytics snapshot for finance overview',()=>{service.getDashboard().subscribe();const req=http.expectOne(base.replace('/api/v1/finance','')+'/api/v1/analytics/dashboard');expect(req.request.method).toBe('GET');req.flush({students:{total:120,active:110},finance:{outstandingBalance:150000,currency:'PKR'}});});\n it('creates fee heads and fee structures with backend request shapes',()=>{
   service.createFeeHead({code:'TUIT',name:'Tuition Fee',isMandatory:true}).subscribe();let req=http.expectOne(base+'/fee-heads');expect(req.request.method).toBe('POST');expect(req.request.body).toEqual({code:'TUIT',name:'Tuition Fee',isMandatory:true});req.flush({id:'head-1'});
   service.createFeeStructure({academicProgramId:'program-1',academicSessionId:'session-1',semesterNumber:1,name:'BSCS Semester 1',items:[{feeHeadId:'head-1',amount:25000}]}).subscribe();req=http.expectOne(base+'/fee-structures');expect(req.request.method).toBe('POST');expect(req.request.body.items[0]).toEqual({feeHeadId:'head-1',amount:25000});req.flush({id:'structure-1'});
  });
