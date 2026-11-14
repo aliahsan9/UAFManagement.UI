@@ -1,0 +1,15 @@
+import { TestBed } from '@angular/core/testing';
+import { provideHttpClient } from '@angular/common/http';
+import { HttpTestingController,provideHttpClientTesting } from '@angular/common/http/testing';
+import { afterEach,beforeEach,describe,expect,it } from 'vitest';
+import { environment } from '../../../environments/environment';
+import { TimetableService } from './timetable.service';
+describe('TimetableService',()=>{let api:TimetableService;let http:HttpTestingController;const base=environment.apiBaseUrl+'/api/v1/timetable';
+ beforeEach(()=>{TestBed.configureTestingModule({providers:[provideHttpClient(),provideHttpClientTesting()]});api=TestBed.inject(TimetableService);http=TestBed.inject(HttpTestingController);});
+ afterEach(()=>http.verify());
+ it('filters rooms by campus and gets room details',()=>{api.getRooms('campus-1').subscribe();const list=http.expectOne(r=>r.url===base+'/rooms'&&r.params.get('campusId')==='campus-1');expect(list.request.method).toBe('GET');list.flush([]);api.getRoom('room-1').subscribe();const detail=http.expectOne(base+'/rooms/room-1');expect(detail.request.method).toBe('GET');detail.flush({id:'room-1'});});
+ it('creates rooms with the backend request shape',()=>{const body={campusId:'campus-1',code:'R-101',name:'Room 101',capacity:60,roomType:'Classroom'};api.createRoom(body).subscribe();const r=http.expectOne(base+'/rooms');expect(r.request.method).toBe('POST');expect(r.request.body).toEqual(body);r.flush({id:'room-1'});});
+ it('lists entries by session and offering filters',()=>{api.getEntries({academicSessionId:'session-1',courseOfferingId:'offering-1'}).subscribe();const r=http.expectOne(q=>q.url===base+'/entries'&&q.params.get('academicSessionId')==='session-1'&&q.params.get('courseOfferingId')==='offering-1');expect(r.request.method).toBe('GET');r.flush([]);});
+ it('creates recurring entries and fetches entry details',()=>{const body={courseOfferingId:'offering-1',roomId:'room-1',dayOfWeek:1,startTime:'09:00',endTime:'10:00',effectiveFrom:'2026-09-01',effectiveTo:'2026-12-31'};api.createEntry(body).subscribe();const create=http.expectOne(base+'/entries');expect(create.request.method).toBe('POST');expect(create.request.body).toEqual(body);create.flush({id:'entry-1'});api.getEntry('entry-1').subscribe();const detail=http.expectOne(base+'/entries/entry-1');expect(detail.request.method).toBe('GET');detail.flush({id:'entry-1'});});
+ it('cancels an entry using DELETE',()=>{api.cancelEntry('entry-1').subscribe();const r=http.expectOne(base+'/entries/entry-1');expect(r.request.method).toBe('DELETE');r.flush(null);});
+});
