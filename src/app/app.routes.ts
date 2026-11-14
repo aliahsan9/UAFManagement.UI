@@ -12,6 +12,12 @@ const timetablePermissions=['timetable.manage'];
 const attendancePermissions=['attendance.manage'];
 const examinationPermissions=['examinations.manage'];
 const examinationApprovalPermissions=['examinations.manage','examinations.approve'];
+const gradingScalePermissions=['grading-scales.manage','academic-catalog.manage'];
+const courseGradePermissions=['course-grades.manage','course-offerings.manage'];
+const gradeAppealPermissions=['grade-appeals.review'];
+const gradeRevisionRequestPermissions=['grade-revisions.manage'];
+const gradeRevisionApprovalPermissions=['grade-revisions.manage','grade-revisions.approve'];
+const financePermissions=['finance.manage','analytics.read'];
 export const routes:Routes=[
  {path:'auth',loadComponent:()=>import('./features/auth/auth-layout/auth-layout').then(m=>m.AuthLayout),children:[{path:'login',loadComponent:()=>import('./features/auth/login/login').then(m=>m.Login)},{path:'register',loadComponent:()=>import('./features/auth/register/register').then(m=>m.Register)},{path:'',pathMatch:'full',redirectTo:'login'}]},
  {path:'applicant/login',loadComponent:()=>import('./features/admissions/applicant-auth-page').then(m=>m.ApplicantAuthPage),data:{mode:'login'}},
@@ -26,6 +32,7 @@ export const routes:Routes=[
   {path:'applications/:id/readiness',loadComponent:()=>import('./features/admissions/applicant-application-details').then(m=>m.ApplicantApplicationDetails)},
   {path:'applications/:id',loadComponent:()=>import('./features/admissions/applicant-application-details').then(m=>m.ApplicantApplicationDetails)},
   {path:'',pathMatch:'full',redirectTo:'dashboard'}]},
+ {path:'transcript-verification/:verificationCode',loadComponent:()=>import('./features/transcripts/transcript-verification-page').then(m=>m.TranscriptVerificationPage)},
  {path:'',canActivate:[authGuard],canActivateChild:[roleGuard],loadComponent:()=>import('./layouts/admin-layout/admin-layout').then(m=>m.AdminLayout),children:[
   {path:'dashboard',loadComponent:()=>import('./features/dashboard/dashboard').then(m=>m.Dashboard)},
   {path:'academic-structure/universities',loadComponent:()=>import('./features/academic-structure/academic-structure-page').then(m=>m.AcademicStructurePage),data:{entity:'universities',permissions:academicPermissions}},
@@ -42,6 +49,15 @@ export const routes:Routes=[
   {path:'students/:id/edit',loadComponent:()=>import('./features/students/student-form-page').then(m=>m.StudentFormPage),data:{permissions:studentPermissions}},
   {path:'students/:id',loadComponent:()=>import('./features/students/student-details-page').then(m=>m.StudentDetailsPage),data:{permissions:studentPermissions}},
   {path:'attendance',loadComponent:()=>import('./features/attendance/attendance-page').then(m=>m.AttendancePage),data:{permissions:attendancePermissions}},
+  {path:'finance',loadComponent:()=>import('./features/finance/finance-page').then(m=>m.FinancePage),data:{permissions:financePermissions}},
+  {path:'grading/scales',loadComponent:()=>import('./features/grading/grading-management-page').then(m=>m.GradingManagementPage),data:{mode:'scales',permissions:gradingScalePermissions}},
+  {path:'grading/finalization',loadComponent:()=>import('./features/grading/grading-management-page').then(m=>m.GradingManagementPage),data:{mode:'finalization',permissions:courseGradePermissions}},
+  {path:'grading/appeals',loadComponent:()=>import('./features/grading/grading-management-page').then(m=>m.GradingManagementPage),data:{mode:'appeals',permissions:gradeAppealPermissions}},
+  {path:'grading/revisions/approvals',loadComponent:()=>import('./features/grading/grading-management-page').then(m=>m.GradingManagementPage),data:{mode:'revisionApprovals',permissions:gradeRevisionApprovalPermissions}},
+  {path:'grading/revisions',loadComponent:()=>import('./features/grading/grading-management-page').then(m=>m.GradingManagementPage),data:{mode:'revisions',permissions:gradeRevisionRequestPermissions}},
+  {path:'my-academic-record',loadComponent:()=>import('./features/grading/my-academic-record-page').then(m=>m.MyAcademicRecordPage),data:{roles:['Student']}},
+  {path:'my-transcripts',loadComponent:()=>import('./features/transcripts/my-transcripts-page').then(m=>m.MyTranscriptsPage),data:{roles:['Student']}},
+  {path:'transcripts/issue',loadComponent:()=>import('./features/transcripts/transcript-issuance-page').then(m=>m.TranscriptIssuancePage),data:{permissions:['transcripts.issue']}},
   {path:'examinations/:id/results',loadComponent:()=>import('./features/examinations/examination-results-page').then(m=>m.ExaminationResultsPage),data:{permissions:examinationPermissions}},
   {path:'examinations/approvals',loadComponent:()=>import('./features/examinations/examinations-page').then(m=>m.ExaminationsPage),data:{mode:'approval',permissions:examinationApprovalPermissions}},
   {path:'examinations',loadComponent:()=>import('./features/examinations/examinations-page').then(m=>m.ExaminationsPage),data:{permissions:examinationPermissions}},
