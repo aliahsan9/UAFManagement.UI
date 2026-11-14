@@ -94,3 +94,36 @@ The academic-structure UI is implemented against the backend AcademicStructureEn
 **Actual hierarchy:** University → Campus and University → Faculty → Department → Academic Program. Campus is a sibling branch under University, not a parent of Faculty. Create forms use cascading university/faculty/department selectors. Update DTOs omit parent IDs, so existing parent relationships are preserved during edits. Deactivation is available only where the backend exposes DELETE; universities do not have a deactivation action.
 
 The backend requires its AcademicStructureAdmin authorization policy, which checks the academic-structure.manage permission. The API remains the source of truth for assigning that permission to users and roles. The frontend route guard is a navigation aid; backend authorization remains authoritative. Bootstrap 5.3.8 CSS is loaded globally and used for the Phase 3 layout, cards, tables, form controls, badges and modal structure. The modal is controlled by Angular; no Bootstrap JavaScript bundle is required.
+
+## Phase 4 — Academic sessions and courses
+
+Implemented with the API contracts in `AcademicCatalogEndpoints.cs` and `AcademicCatalogModels.cs`. All pages are lazy-loaded and protected by the `academic-catalog.manage` permission; the backend authorization policy remains authoritative.
+
+### Academic sessions
+
+| UI capability | API |
+| --- | --- |
+| List / status filter | `GET /api/v1/academic-sessions/?status={Planned|Active|Completed|Cancelled}` |
+| Create | `POST /api/v1/academic-sessions/` |
+| Edit | `PUT /api/v1/academic-sessions/{id}` |
+| Details | `GET /api/v1/academic-sessions/{id}` |
+| Activate | `POST /api/v1/academic-sessions/{id}/activate` |
+| Complete | `POST /api/v1/academic-sessions/{id}/complete` |
+| Cancel | `POST /api/v1/academic-sessions/{id}/cancel` |
+
+Session status values follow the backend enum: Planned=1, Active=2, Completed=3, Cancelled=4. The UI respects lifecycle rules: only Planned sessions can activate; only Active sessions can complete; only Planned or Active sessions can be cancelled. Active and Completed sessions cannot be edited. The date range is validated in the form and again by the API/domain.
+
+### Courses
+
+| UI capability | API |
+| --- | --- |
+| List and department/active filters | `GET /api/v1/courses/?departmentId={id}&isActive={true|false}` |
+| Create | `POST /api/v1/courses/` |
+| Edit | `PUT /api/v1/courses/{id}` |
+| Details | `GET /api/v1/courses/{id}` |
+| Deactivate | `DELETE /api/v1/courses/{id}` |
+| Reactivate | `POST /api/v1/courses/{id}/reactivate` |
+
+Course creation selects an active department. Department ownership is immutable in the update DTO, so the department selector is locked during editing and no parent ID is sent on update. Credit hours must be greater than zero and at most 10. Course codes are normalized to uppercase. The API can reject deactivation when draft or published offerings exist; the UI displays the backend error rather than silently changing the course.
+
+The course details response contains the department ID rather than a department display name. The UI resolves that ID against the existing academic-structure departments endpoint; no department names are fabricated. All screens use the existing Bootstrap 5.3.8 styling system.
