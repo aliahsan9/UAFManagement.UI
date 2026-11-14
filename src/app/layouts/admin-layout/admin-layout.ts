@@ -10,7 +10,13 @@ import { NotificationService } from '../../core/services/notification.service';
  <a class="brand" routerLink="/dashboard"><span class="brand__mark">U</span><span><strong>UAF</strong><small>Management System</small></span></a>
  <div class="sidebar-caption">WORKSPACE</div><nav class="sidebar-nav" aria-label="Main navigation">
  <a routerLink="/dashboard" routerLinkActive="nav-link--active"><span>⌂</span> Overview</a>
- <div class="sidebar-caption sidebar-caption--spaced">UNIVERSITY</div>
+ <div class="sidebar-caption sidebar-caption--spaced">ACADEMIC STRUCTURE</div>
+ <a routerLink="/academic-structure/universities" routerLinkActive="nav-link--active"><span>▦</span> Universities</a>
+ <a routerLink="/academic-structure/campuses" routerLinkActive="nav-link--active"><span>⌖</span> Campuses</a>
+ <a routerLink="/academic-structure/faculties" routerLinkActive="nav-link--active"><span>▤</span> Faculties</a>
+ <a routerLink="/academic-structure/departments" routerLinkActive="nav-link--active"><span>▥</span> Departments</a>
+ <a routerLink="/academic-structure/programs" routerLinkActive="nav-link--active"><span>▧</span> Academic programs</a>
+ <div class="sidebar-caption sidebar-caption--spaced">OTHER MODULES</div>
  @for(item of modules;track item.name){<span class="nav-link nav-link--muted"><span>{{item.icon}}</span>{{item.name}}<small>SOON</small></span>}
  </nav><div class="sidebar-footer"><div class="sidebar-help-icon">?</div><div><strong>Need assistance?</strong><small>Contact your system administrator.</small></div></div><div class="sidebar-version">UAF PORTAL <span>v1.0</span></div>
  </aside><div class="admin-main"><header class="topbar"><div class="topbar-left"><button class="icon-button menu-toggle" (click)="sidebarOpen.update(v=>!v)" aria-label="Toggle navigation">☰</button><div class="breadcrumbs"><span>Workspace</span><b>/</b><strong>{{pageTitle()}}</strong></div></div>
@@ -26,6 +32,6 @@ export class AdminLayout {
  readonly sidebarOpen=signal(false);readonly profileOpen=signal(false);readonly notificationsOpen=signal(false);readonly searchTerm=signal('');readonly pageTitle=signal('Overview');readonly year=new Date().getFullYear();
  readonly modules=[{name:'Admissions',icon:'↗'},{name:'Academics',icon:'▤'},{name:'Students',icon:'♙'},{name:'Finance',icon:'◈'},{name:'Employees',icon:'♧'},{name:'Examinations',icon:'▣'}];
  get initials():string{return(this.auth.currentUser()?.fullName??'UAF').split(' ').slice(0,2).map(x=>x[0]).join('').toUpperCase();}
- constructor(){this.router.events.pipe(filter(e=>e instanceof NavigationEnd)).subscribe(()=>{this.pageTitle.set(this.router.url.includes('dashboard')?'Overview':'Workspace');this.profileOpen.set(false);this.notificationsOpen.set(false);this.sidebarOpen.set(false);});}
+ constructor(){this.router.events.pipe(filter(e=>e instanceof NavigationEnd)).subscribe(()=>{this.pageTitle.set(this.router.url.includes('dashboard')?'Overview':this.router.url.split('/').filter(Boolean).pop()?.replaceAll('-',' ')??'Workspace');this.profileOpen.set(false);this.notificationsOpen.set(false);this.sidebarOpen.set(false);});}
  async logout():Promise<void>{this.profileOpen.set(false);const ok=await this.confirm.confirm('You will need to sign in again to access the portal.',{title:'Sign out of your account?',confirmText:'Sign out',danger:true});if(!ok)return;this.auth.logout().subscribe(()=>{this.notices.show('You have been signed out.','success');void this.router.navigateByUrl('/auth/login');});}
 }
