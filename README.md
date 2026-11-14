@@ -547,7 +547,7 @@ The shared portal dashboard component renders different titles, descriptions and
 | `Employees.Management` | Employee management |
 | `CourseOfferings.Management` | Offerings and enrollment |
 | `Attendance.Management` | Attendance |
-| `Attendance.PolicyManagement` | Attendance policy configuration route |
+| `Attendance.PolicyManagement` | Attendance policy tab within attendance management |
 | `Examinations.Management` | Examination and marks workflows |
 | `Examinations.Approval` | Examination approvals, together with examination management |
 | `Grading.ScaleManagement` | Grade scales |
