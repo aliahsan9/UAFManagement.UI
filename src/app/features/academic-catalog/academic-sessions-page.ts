@@ -1,5 +1,6 @@
 import { Component, DestroyRef, OnInit, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Observable } from 'rxjs';
 import { FormBuilder, ReactiveFormsModule, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
 import { AcademicCatalogService } from './academic-catalog.service';
@@ -124,10 +125,10 @@ export class AcademicSessionsPage implements OnInit {
     const value = this.form.getRawValue();
     const request: AcademicSessionRequest = { name:value.name!.trim(), code:value.code!.trim().toUpperCase(), startDate:value.startDate!, endDate:value.endDate! };
     this.saving.set(true);
-    const request$ = this.editingId() ? this.api.updateSession(this.editingId()!, request) : this.api.createSession(request);
+    const request$: Observable<unknown> = this.editingId() ? this.api.updateSession(this.editingId()!, request) : this.api.createSession(request);
     request$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => { this.notifications.show(this.editingId()?'Academic session updated.':'Academic session created.','success'); this.formOpen.set(false); this.load(); },
-      error: err => { this.notifications.show(this.errorMessage(err),'error'); this.saving.set(false); },
+      error: (err: unknown) => { this.notifications.show(this.errorMessage(err),'error'); this.saving.set(false); },
       complete: () => this.saving.set(false)
     });
   }
