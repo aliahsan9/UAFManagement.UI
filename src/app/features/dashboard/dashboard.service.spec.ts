@@ -28,7 +28,11 @@ describe('DashboardService', () => {
 
     for (const request of requests) {
       if (request.request.url.endsWith('/students/') || request.request.url.endsWith('/employees/')) {
-        request.flush({ items: [], page: 1, pageSize: 1, totalCount: 12, totalPages: 12 });
+        const status = request.request.params.get('status');
+        const isEmployee = request.request.url.endsWith('/employees/');
+        const totalCount = isEmployee ? (status === 'Active' ? 4 : 5) :
+          status === 'Active' ? 8 : status === 'Suspended' ? 1 : status === 'Graduated' ? 2 : status === 'Withdrawn' ? 1 : 12;
+        request.flush({ items: [], page: 1, pageSize: 1, totalCount, totalPages: totalCount });
       } else if (request.request.url.endsWith('/academic-structure/programs')) {
         request.flush([{ id: 'p1', name: 'Computer Science', code: 'CS', isActive: true }]);
       } else if (request.request.url.endsWith('/academic-sessions/')) {
@@ -41,6 +45,7 @@ describe('DashboardService', () => {
     expect(summary.programs.value).toBe(1);
     expect(summary.activeSessions.value).toBe(1);
     expect(summary.studentStatuses).toHaveLength(4);
+    expect(summary.studentStatuses.reduce((total: number, item: any) => total + item.value, 0)).toBe(12);
   });
 
   it('marks unavailable resources instead of displaying fabricated zero values', () => {
