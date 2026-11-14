@@ -222,3 +222,31 @@ Implemented in `src/app/features/employees` against the actual `EmployeeEndpoint
 - Teacher profile update is supported by the backend, but there is no read endpoint to detect an existing profile or prefill persisted values. The UI therefore cannot automatically determine create versus update for profiles created before this session; a backend teacher-profile GET endpoint is required for full persisted profile editing.
 - Department names use the existing academic-structure departments endpoint. That lookup additionally requires `academic-structure.manage`; if unavailable, the employee remains accessible and the UI falls back to the department identifier.
 - Employee endpoints inherit `Employees.Management`, mapped to `employees.manage`. The route guard is a navigation aid; API authorization remains authoritative.
+
+
+## Phase 9 — Timetable and room management
+
+Implemented in `src/app/features/timetable` against `TimetableEndpoints.cs` and the actual `TimetableModels.cs` records.
+
+### Screens and workflows
+- `/timetable`: scheduling workspace with Timetable Calendar, Teaching Rooms and Entry List views.
+- Teaching room directory supports campus filtering, room details and creation.
+- Calendar supports Daily, Weekly, Course-wise and Room-wise views over the backend's recurring weekly entries.
+- Entry list supports academic-session filtering and room/campus scoping.
+- Create timetable entry sends course offering, room, .NET DayOfWeek value (Sunday=0), local start/end times, and effective date range.
+- Entry details are loaded from the dedicated detail endpoint; cancellation uses DELETE and requires confirmation.
+
+### Backend validation and conflict handling
+The frontend does not attempt to replace backend conflict detection. On save, it submits the request to the API and surfaces ProblemDetails validation messages. HTTP 409 is highlighted as a room/time conflict; other errors (invalid date range, insufficient room capacity, inactive room, closed/cancelled offering/session, missing references, etc.) are shown with the backend's detail and validation errors. No optimistic schedule insertion occurs after a failed response.
+
+### API mapping
+- Rooms: `GET /api/v1/timetable/rooms?campusId=`, `GET /rooms/{id}`, `POST /rooms`.
+- Entries: `GET /entries?academicSessionId=&courseOfferingId=`, `GET /entries/{id}`, `POST /entries`, `DELETE /entries/{id}`.
+- Room creation uses the existing campus lookup. Course offering, academic session and course labels use their existing module APIs.
+
+### Permissions and API gaps
+- Timetable endpoints inherit `Timetable.Management`, mapped to `timetable.manage`; route guard is a navigation aid and backend authorization is authoritative.
+- Campus names require `academic-structure.manage`; session/course lookups require `academic-catalog.manage`; offering lookup requires `course-offerings.manage`. If a supporting lookup is denied, the page reports that limitation and displays the stable IDs rather than inventing names.
+- The backend models timetable entries as recurring weekly slots, not one-off dated meetings. The daily and weekly calendar views therefore evaluate each slot against its effective date range and weekday.
+- Room creation is supported, but no room update/deactivate endpoint is exposed in the timetable route group.
+- The API exposes no room-specific or date-window query for entries; the UI applies room and calendar filtering to the session-scoped/all entries returned by the backend. For large institutions, add server-side room/date filters and a paged timetable query.

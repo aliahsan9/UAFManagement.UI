@@ -8,6 +8,7 @@ const admissionsDecisionPermissions=['Admissions.Staff','Admissions.Decision'];
 const studentPermissions=['students.manage'];
 const offeringPermissions=['course-offerings.manage'];
 const employeePermissions=['employees.manage'];
+const timetablePermissions=['timetable.manage'];
 export const routes:Routes=[
  {path:'auth',loadComponent:()=>import('./features/auth/auth-layout/auth-layout').then(m=>m.AuthLayout),children:[{path:'login',loadComponent:()=>import('./features/auth/login/login').then(m=>m.Login)},{path:'register',loadComponent:()=>import('./features/auth/register/register').then(m=>m.Register)},{path:'',pathMatch:'full',redirectTo:'login'}]},
  {path:'applicant/login',loadComponent:()=>import('./features/admissions/applicant-auth-page').then(m=>m.ApplicantAuthPage),data:{mode:'login'}},
@@ -37,6 +38,7 @@ export const routes:Routes=[
   {path:'students/new',loadComponent:()=>import('./features/students/student-form-page').then(m=>m.StudentFormPage),data:{permissions:studentPermissions}},
   {path:'students/:id/edit',loadComponent:()=>import('./features/students/student-form-page').then(m=>m.StudentFormPage),data:{permissions:studentPermissions}},
   {path:'students/:id',loadComponent:()=>import('./features/students/student-details-page').then(m=>m.StudentDetailsPage),data:{permissions:studentPermissions}},
+  {path:'timetable',loadComponent:()=>import('./features/timetable/timetable-page').then(m=>m.TimetablePage),data:{permissions:timetablePermissions}},
   {path:'employees',loadComponent:()=>import('./features/employees/employees-directory-page').then(m=>m.EmployeesDirectoryPage),data:{permissions:employeePermissions}},
   {path:'employees/new',loadComponent:()=>import('./features/employees/employee-form-page').then(m=>m.EmployeeFormPage),data:{permissions:employeePermissions}},
   {path:'employees/:id/edit',loadComponent:()=>import('./features/employees/employee-form-page').then(m=>m.EmployeeFormPage),data:{permissions:employeePermissions}},
