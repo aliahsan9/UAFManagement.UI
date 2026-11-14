@@ -1,5 +1,5 @@
 import {Component,input} from '@angular/core';
 import {DatePipe} from '@angular/common';
-import {TimelineEntry} from '../../models/ui.models';
+import type {TimelineEntry} from '../../models/ui.models';
 @Component({selector:'app-audit-timeline',standalone:true,imports:[DatePipe],template:`<section><h3 class="h6 fw-semibold mb-3">{{title()}}</h3>@if(entries().length){<ol class="list-unstyled mb-0">@for(entry of entries();track entry.id){<li class="position-relative ps-4 pb-4 border-start"><span class="position-absolute top-0 start-0 translate-middle rounded-circle bg-primary border border-2 border-white" style="width:11px;height:11px"></span><div class="d-flex flex-wrap align-items-center justify-content-between gap-2"><strong class="small">{{entry.title}}</strong>@if(entry.status){<span class="badge text-bg-light border">{{entry.status}}</span>}</div>@if(entry.description){<p class="small text-secondary mb-1 mt-1">{{entry.description}}</p>}<div class="text-secondary" style="font-size:11px">{{entry.actor||'System'}} · {{entry.timestamp|date:'medium'}}</div></li>}</ol>}@else{<p class="small text-secondary mb-0">{{emptyMessage()}}</p>}</section>`})
 export class AuditTimeline {readonly title=input('Activity history');readonly entries=input<TimelineEntry[]>([]);readonly emptyMessage=input('No history is available.');}
