@@ -24,7 +24,7 @@ const ADMIN_NAV:AdminNavSection[]=[
  {label:'EMPLOYEES',links:[{label:'Employee directory',path:'/employees',policies:['Employees.Management'],icon:'♧'}]},
  {label:'ATTENDANCE',links:[
   {label:'Attendance management',path:'/attendance',policies:['Attendance.Management'],icon:'✓'},
-  {label:'Attendance policies',path:'/attendance/policies',policies:['Attendance.PolicyManagement','AcademicCatalog.Management','CourseOfferings.Management'],icon:'⚙'}]},
+ ]},
  {label:'EXAMINATIONS',links:[
   {label:'Examination management',path:'/examinations',policies:['Examinations.Management'],icon:'▣'},
   {label:'Examination approvals',path:'/examinations/approvals',policies:['Examinations.Management','Examinations.Approval'],icon:'✓'}]},
