@@ -11,7 +11,6 @@ const offeringPolicies=['CourseOfferings.Management'];
 const employeePolicies=['Employees.Management'];
 const timetablePolicies=['Timetable.Management'];
 const attendancePolicies=['Attendance.Management'];
-const attendancePolicyPolicies=['Attendance.PolicyManagement','AcademicCatalog.Management','CourseOfferings.Management'];
 const examinationPolicies=['Examinations.Management'];
 const examinationApprovalPolicies=['Examinations.Management','Examinations.Approval'];
 const gradingScalePolicies=['Grading.ScaleManagement','AcademicCatalog.Management'];
@@ -81,7 +80,6 @@ export const routes:Routes=[
   {path:'students/:id/edit',loadComponent:()=>import('./features/students/student-form-page').then(m=>m.StudentFormPage),data:{policies:studentPolicies}},
   {path:'students/:id',loadComponent:()=>import('./features/students/student-details-page').then(m=>m.StudentDetailsPage),data:{policies:studentPolicies}},
   {path:'attendance',loadComponent:()=>import('./features/attendance/attendance-page').then(m=>m.AttendancePage),data:{policies:attendancePolicies}},
-  {path:'attendance/policies',loadComponent:()=>import('./features/attendance/attendance-page').then(m=>m.AttendancePage),data:{policies:attendancePolicyPolicies}},
   {path:'finance',loadComponent:()=>import('./features/finance/finance-page').then(m=>m.FinancePage),data:{policies:financePolicies}},
   {path:'grading/scales',loadComponent:()=>import('./features/grading/grading-management-page').then(m=>m.GradingManagementPage),data:{mode:'scales',policies:gradingScalePolicies}},
   {path:'grading/finalization',loadComponent:()=>import('./features/grading/grading-management-page').then(m=>m.GradingManagementPage),data:{mode:'finalization',policies:courseGradePolicies}},
