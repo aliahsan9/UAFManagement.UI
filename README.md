@@ -379,7 +379,7 @@ Implemented in `src/app/features/grading` against the backend `GradingEndpoints.
 
 ### Backend limitations surfaced instead of inventing APIs
 
-- No all-scales collection endpoint: scales are loaded by academic session. The backend permits one scale per session.
+- No all-scales collection or scale-update endpoint: scales are loaded by academic session and all bands must be configured during creation. The backend permits one scale per session; published scales are immutable, and an existing draft cannot be edited through the exposed API.
 - No course-grade list or detail endpoint for staff: finalization returns the grade details; the student academic record returns that student's own course-grade attempts.
 - No staff endpoint to fetch another student's GPA record; the academic record endpoint is restricted to the authenticated Student role.
 - No approved-appeals collection or appeal detail endpoint. After approval, the UI surfaces the appeal and course-grade IDs so an authorized revision officer can submit a request.
