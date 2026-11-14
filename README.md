@@ -178,3 +178,47 @@ Status values follow the backend enum: Active=1, Suspended=2, Graduated=3, Withd
 - Academic Records does not misuse the self-service /api/v1/academic-records/me/transcripts route for a different student. A staff-authorized studentId-scoped academic-record query is needed before this tab can show another student's transcript history.
 
 Attendance and examination APIs are offering-scoped, not student-scoped. The frontend discovers the student's enrolled offerings first and caps parallel requests to avoid unbounded fan-out. A dedicated student academic-summary endpoint would be more efficient at institutional scale.
+
+
+## Phase 7 — Course offerings and enrollment
+
+Implemented in `src/app/features/course-offerings` against the actual Minimal API contracts in `CourseOfferingEndpoints.cs` and `CourseEnrollmentEndpoints.cs`.
+
+### Routes and workflows
+
+- `/course-offerings`: searchable offering register with course/session/status filters, credit hours, enrollment counts, capacity utilization, and create/edit/lifecycle actions.
+- `/course-offerings/:id`: offering details with Overview, Students, and Timetable tabs.
+- Create uses `POST /api/v1/course-offerings/` with `courseId`, `academicSessionId`, `section`, `capacity`, and optional `instructorEmployeeId`.
+- Edit uses `PUT /api/v1/course-offerings/{id}`; the backend contract only permits capacity and instructor changes, so course/session/section are intentionally immutable in the UI.
+- Publish, close, and cancel use their dedicated POST lifecycle routes.
+- Enrollment listing uses `GET /api/v1/course-offerings/{id}/enrollments`; enrolling uses `POST /api/v1/course-offerings/{id}/enrollments/{studentId}` with `enrolledOn`.
+- Drop, withdraw, and complete use `/api/v1/course-enrollments/{id}/{drop|withdraw|complete}`.
+- Timetable is read-only in this phase and queries `GET /api/v1/timetable/entries?courseOfferingId={id}`, then resolves room labels from the timetable room API.
+
+### API and permission notes
+
+The offering and enrollment endpoints both require `CourseOfferings.Management`, mapped to `course-offerings.manage`; the route guard uses that exact permission. The timetable tab requires the separate `timetable.manage` permission. Student lookup/name resolution uses the student-management API and therefore requires `students.manage`; when unavailable, the UI shows a clear permission message or the student ID rather than inventing data.
+
+The backend returns IDs for course, session, instructor and student relationships rather than denormalized names. The UI resolves course and session labels using the existing academic catalog endpoints, and resolves student names individually. Instructor selection remains an optional employee GUID because this offering API does not expose an instructor search endpoint.
+
+Status values match the backend enums: offering Draft=1, Published=2, Closed=3, Cancelled=4; enrollment Enrolled=1, Dropped=2, Completed=3, Withdrawn=4. All important lifecycle and enrollment transitions require confirmation, and the backend remains authoritative for capacity, duplicate enrollment and state validation.
+
+## Phase 8 — Employee and teacher management
+
+Implemented in `src/app/features/employees` against the actual `EmployeeEndpoints.cs` contracts.
+
+### Routes and workflows
+- `/employees`: employee dashboard cards and paginated directory with department, category and employment-status filters.
+- `/employees/new`: create employee using employee number, name, email, designation, department, category, joining date, optional phone and optional identity user ID.
+- `/employees/:id`: employee details with Personal Details, Employment Details, Department, Teacher Qualifications and Academic Rank tabs.
+- `/employees/:id/edit`: edit only fields supported by `UpdateEmployeeProfileRequest` (name, email, designation and phone).
+- Department transfer uses `PUT /api/v1/employees/{id}/department`; status changes use `PUT /api/v1/employees/{id}/status` with status and optional effective date.
+- Academic employees can create/update teacher profile data using dedicated teacher-profile POST/PUT endpoints.
+
+### Contract and authorization notes
+- Directory: `GET /api/v1/employees/?page=&pageSize=&departmentId=&status=&category=`; detail: `GET /api/v1/employees/{id}`.
+- Create: `POST /api/v1/employees/`; profile update: `PUT /api/v1/employees/{id}/profile`.
+- No employee delete, teacher-profile GET, or dedicated employee-dashboard aggregate endpoint is exposed. Dashboard cards are derived from the first 100 employee records, so these are explicitly a snapshot rather than institution-wide authoritative totals when the dataset exceeds that window.
+- Teacher profile update is supported by the backend, but there is no read endpoint to detect an existing profile or prefill persisted values. The UI therefore cannot automatically determine create versus update for profiles created before this session; a backend teacher-profile GET endpoint is required for full persisted profile editing.
+- Department names use the existing academic-structure departments endpoint. That lookup additionally requires `academic-structure.manage`; if unavailable, the employee remains accessible and the UI falls back to the department identifier.
+- Employee endpoints inherit `Employees.Management`, mapped to `employees.manage`. The route guard is a navigation aid; API authorization remains authoritative.
