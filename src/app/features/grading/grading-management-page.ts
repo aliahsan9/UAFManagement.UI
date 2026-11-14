@@ -29,7 +29,7 @@ import { AcademicRecordCourse,CourseGrade,GradeAppeal,GradeAppealAudit,GradeBand
    }@else if(sessionId()&&!loading()){<div class="alert alert-info small">No grading scale exists for this session. Create one below. The backend allows one scale per academic session.</div>}
   </div></div></div>
   <div class="col-xl-7"><div class="card border-0 shadow-sm"><div class="card-header bg-white p-3"><h2 class="h6 fw-bold mb-0">Grade scale builder</h2><p class="small text-secondary mb-0">Configure thresholds, grade points, pass criteria and GPA repeat policy.</p></div><div class="card-body">
-   <form [formGroup]="scaleForm" (ngSubmit)="createScale()">
+   @if(!scale()){<form [formGroup]="scaleForm" (ngSubmit)="createScale()">
     <div class="mb-3"><label class="form-label">Scale name</label><input class="form-control" formControlName="name" maxlength="120" placeholder="UAF 4.00 grading scale"></div>
     <div class="row g-3 mb-3"><div class="col-md-6"><label class="form-label">Repeat course policy</label><select class="form-select" formControlName="repeatCoursePolicy">@for(p of repeatPolicies;track p.value){<option [ngValue]="p.value">{{p.label}}</option>}</select></div><div class="col-md-6 d-flex align-items-end"><div class="form-check mb-2"><input class="form-check-input" id="failed-gpa" type="checkbox" formControlName="includeFailedCoursesInGpa"><label class="form-check-label" for="failed-gpa">Include failed courses in GPA</label></div></div></div>
     <div class="d-flex justify-content-between align-items-center mb-2"><div><h3 class="h6 fw-bold mb-0">Grade band editor</h3><small class="text-secondary">Minimum percentage 0–100 · grade points 0–10 · unique letters and thresholds</small></div><button type="button" class="btn btn-sm btn-outline-primary" (click)="addBand()" [disabled]="bands().length>=30">Add band</button></div>
@@ -37,7 +37,7 @@ import { AcademicRecordCourse,CourseGrade,GradeAppeal,GradeAppealAudit,GradeBand
     @if(scaleValidation()){<div class="alert alert-warning small">{{scaleValidation()}}</div>}
     <button class="btn btn-primary" [disabled]="scaleForm.invalid||creatingScale()||!!scale()||!sessionId()">{{creatingScale()?'Creating…':'Create grade scale'}}</button>
     @if(scale()?.isPublished){<p class="small text-secondary mt-2 mb-0">Published scales are immutable. A new scale cannot be created for a session that already has one.</p>}
-   </form>
+   </form>}@else{<div class="alert alert-info small mb-0">A grading scale already exists for this academic session. The backend exposes no scale update endpoint, so its bands cannot be edited after creation. Review the configured bands and publish when approved.</div>}
   </div></div></div></div>
  }
  @if(mode==='finalization'){
