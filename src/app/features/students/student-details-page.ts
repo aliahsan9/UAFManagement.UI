@@ -2,12 +2,12 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule, CurrencyPipe, DatePipe, DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { EMPTY, catchError, from, map, mergeMap, of, switchMap, toArray } from 'rxjs';
+import { catchError, from, map, mergeMap, of, switchMap, toArray } from 'rxjs';
 import { AcademicStructureService } from '../academic-structure/academic-structure.service';
 import { AcademicProgram } from '../academic-structure/academic-structure.models';
 import { ConfirmationService } from '../../core/services/confirmation.service';
 import { NotificationService } from '../../core/services/notification.service';
-import { Student, StudentAttendanceRow, CourseAttendanceReport, ExaminationResult, ExaminationListItem, StudentFeeAccount, StudentStatus, studentStatusLabel } from './students.models';
+import { Student, StudentAttendanceRow, ExaminationResult, StudentFeeAccount, StudentStatus, CourseOffering, studentStatusLabel } from './students.models';
 import { StudentsService } from './students.service';
 import { StudentStatusBadge } from './student-status-badge';
 
@@ -59,5 +59,5 @@ export class StudentDetailsPage implements OnInit {
  loadFees():void{this.feeLoading.set(true);this.feeError.set(null);this.service.getFeeAccount(this.id).subscribe({next:x=>{this.feeAccount.set(x);this.feeLoading.set(false);},error:e=>{this.feeError.set(e.error?.detail??'Fee account is unavailable. Check finance permissions.');this.feeLoading.set(false);}});}
  loadAttendance():void{this.attendanceLoading.set(true);this.attendanceError.set(null);this.studentOfferings().pipe(switchMap(offerings=>from(offerings).pipe(mergeMap(offering=>this.service.getAttendanceReport(offering.id).pipe(map(report=>{const row=report.students.find(x=>x.studentId===this.id);return row?{...row,offeringId:offering.id,section:offering.section}:null;}),catchError(()=>of(null))),4),toArray()))).subscribe({next:rows=>{this.attendanceRows.set(rows.filter((x):x is StudentAttendanceRow&{offeringId:string;section:string}=>x!==null));this.attendanceLoading.set(false);},error:e=>{this.attendanceError.set(e.error?.detail??'Attendance could not be loaded. This view requires course-offering and attendance-report permissions.');this.attendanceLoading.set(false);}});}
  loadExaminations():void{this.examLoading.set(true);this.examError.set(null);this.studentOfferings().pipe(switchMap(offerings=>from(offerings).pipe(mergeMap(offering=>this.service.getOfferingExaminations(offering.id).pipe(switchMap(exams=>from(exams.filter(x=>x.status===6)).pipe(mergeMap(exam=>this.service.getExaminationResults(exam.id).pipe(map(results=>{const row=results.find(x=>x.studentId===this.id);return row?{...row,examId:exam.id,title:exam.title,scheduledDate:exam.scheduledDate,maximumMarks:exam.maximumMarks,offeringId:offering.id}:null;}),catchError(()=>of(null))),3),toArray())),catchError(()=>of([]))),3),toArray()),map(nested=>nested.flat()))).subscribe({next:rows=>{this.examRows.set(rows.filter((x):x is ExaminationResult&{examId:string;title:string;scheduledDate:string;maximumMarks:number;offeringId:string}=>x!==null));this.examLoading.set(false);},error:e=>{this.examError.set(e.error?.detail??'Examination results could not be loaded. Check course-offering and examination permissions.');this.examLoading.set(false);}});}
- private studentOfferings(){return this.service.getCourseOfferings().pipe(switchMap(offerings=>from(offerings).pipe(mergeMap(offering=>this.service.getEnrollments(offering.id).pipe(map(rows=>rows.some(x=>x.studentId===this.id&&(x.status===1||x.status===3))?offering:null),catchError(()=>of(null))),4),toArray(),map(rows=>rows.filter(x=>x!==null))));}
+ private studentOfferings(){return this.service.getCourseOfferings().pipe(switchMap(offerings=>from(offerings).pipe(mergeMap(offering=>this.service.getEnrollments(offering.id).pipe(map(rows=>rows.some(x=>x.studentId===this.id&&(x.status===1||x.status===3))?offering:null),catchError(()=>of(null))),4),toArray(),map(rows=>rows.filter((x):x is CourseOffering=>x!==null))));}
 }
