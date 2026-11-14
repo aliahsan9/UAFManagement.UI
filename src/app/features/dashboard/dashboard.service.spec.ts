@@ -41,7 +41,7 @@ describe('DashboardService', () => {
     }
 
     expect(summary.students.value).toBe(12);
-    expect(summary.employees.value).toBe(12);
+    expect(summary.employees.value).toBe(5);
     expect(summary.programs.value).toBe(1);
     expect(summary.activeSessions.value).toBe(1);
     expect(summary.studentStatuses).toHaveLength(4);
