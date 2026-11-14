@@ -8,7 +8,7 @@ import { ConfirmationService } from '../../../core/services/confirmation.service
         <div class="confirm-dialog__icon">?</div><h2 id="confirm-dialog-title">{{ state.title }}</h2><p id="confirm-dialog-message">{{ state.message }}</p>
         <div class="confirm-dialog__actions">
           <button class="btn btn--quiet" (click)="confirmation.close(false)">{{ state.cancelText }}</button>
-          <button class="btn" [class.btn--danger]="state.danger" (click)="confirmation.close(true)">{{ state.confirmText }}</button>
+          <button class="btn" [class.btn--danger]="state.danger" [class.btn--primary]="!state.danger" (click)="confirmation.close(true)">{{ state.confirmText }}</button>
         </div>
       </section>
     </div>

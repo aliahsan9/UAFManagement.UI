@@ -3,6 +3,8 @@ import { CommonModule, CurrencyPipe, DatePipe, DecimalPipe } from '@angular/comm
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { catchError, from, map, mergeMap, of, switchMap, toArray } from 'rxjs';
+import { canAccess } from '../../core/auth/access';
+import { AuthService } from '../../core/services/auth.service';
 import { AcademicStructureService } from '../academic-structure/academic-structure.service';
 import { AcademicProgram } from '../academic-structure/academic-structure.models';
 import { ConfirmationService } from '../../core/services/confirmation.service';
@@ -22,7 +24,7 @@ type StudentTab='personal'|'registration'|'program'|'records'|'attendance'|'exam
    <header class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4"><div><div class="text-uppercase small fw-semibold text-primary mb-1">STUDENT PROFILE</div><h1 class="h3 mb-1">{{s.fullName}}</h1><div class="d-flex flex-wrap align-items-center gap-2"><span class="text-muted">{{s.registrationNumber}}</span><app-student-status-badge [status]="s.status"/></div></div><div class="d-flex flex-wrap gap-2"><a class="btn btn-outline-primary" [routerLink]="['/students',s.id,'edit']">Edit profile</a>@if(s.status===StudentStatus.Active){<button class="btn btn-outline-warning" (click)="changeStatus('suspend')">Suspend</button><button class="btn btn-outline-danger" (click)="changeStatus('withdraw')">Withdraw</button><button class="btn btn-outline-success" (click)="changeStatus('graduate')">Graduate</button>}@else if(s.status===StudentStatus.Suspended){<button class="btn btn-outline-success" (click)="changeStatus('reactivate')">Reactivate</button><button class="btn btn-outline-danger" (click)="changeStatus('withdraw')">Withdraw</button>}</div></header>
    <div class="card border-0 shadow-sm">
     <div class="card-header bg-white p-0"><nav class="nav nav-tabs flex-nowrap overflow-auto px-3 pt-2" aria-label="Student profile sections">
-     @for(t of tabs;track t.id){<button class="nav-link text-nowrap" type="button" [class.active]="activeTab()===t.id" (click)="selectTab(t.id)">{{t.label}}</button>}
+     @for(t of visibleTabs();track t.id){<button class="nav-link text-nowrap" type="button" [class.active]="activeTab()===t.id" (click)="selectTab(t.id)">{{t.label}}</button>}
     </nav></div>
     <div class="card-body p-3 p-lg-4">
      @if(activeTab()==='personal'){<div class="d-flex justify-content-between align-items-center mb-3"><h2 class="h5 mb-0">Personal information</h2><a class="btn btn-sm btn-outline-primary" [routerLink]="['/students',s.id,'edit']">Edit information</a></div><div class="row g-3"><div class="col-md-6"><div class="text-muted small">Full name</div><strong>{{s.fullName}}</strong></div><div class="col-md-6"><div class="text-muted small">Email address</div><strong>{{s.email}}</strong></div><div class="col-md-6"><div class="text-muted small">Phone number</div><strong>{{s.phoneNumber||'Not provided'}}</strong></div><div class="col-md-6"><div class="text-muted small">Current status</div><app-student-status-badge [status]="s.status"/></div></div>
@@ -41,8 +43,9 @@ type StudentTab='personal'|'registration'|'program'|'records'|'attendance'|'exam
   }
  </section>`})
 export class StudentDetailsPage implements OnInit {
- private readonly route=inject(ActivatedRoute);private readonly service=inject(StudentsService);private readonly structure=inject(AcademicStructureService);private readonly confirm=inject(ConfirmationService);private readonly notices=inject(NotificationService);
- readonly StudentStatus=StudentStatus;readonly tabs:{id:StudentTab;label:string}[]=[{id:'personal',label:'Personal information'},{id:'registration',label:'Registration'},{id:'program',label:'Academic program'},{id:'records',label:'Academic records'},{id:'attendance',label:'Attendance'},{id:'examinations',label:'Examination results'},{id:'fees',label:'Fee account'}];
+ private readonly route=inject(ActivatedRoute);private readonly service=inject(StudentsService);private readonly structure=inject(AcademicStructureService);private readonly confirm=inject(ConfirmationService);private readonly notices=inject(NotificationService);private readonly auth=inject(AuthService);
+ readonly StudentStatus=StudentStatus;private readonly tabs:{id:StudentTab;label:string}[]=[{id:'personal',label:'Personal information'},{id:'registration',label:'Registration'},{id:'program',label:'Academic program'},{id:'records',label:'Academic records'},{id:'attendance',label:'Attendance'},{id:'examinations',label:'Examination results'},{id:'fees',label:'Fee account'}];
+ visibleTabs(){return this.tabs.filter(tab=>tab.id!=='fees'||canAccess(this.auth.currentUser(),['finance.read']));}
  readonly student=signal<Student|null>(null);readonly loading=signal(true);readonly error=signal<string|null>(null);readonly activeTab=signal<StudentTab>('personal');
  readonly programs=signal<AcademicProgram[]>([]);readonly activePrograms=signal<AcademicProgram[]>([]);readonly programError=signal<string|null>(null);newProgramId='';readonly programSaving=signal(false);
  readonly attendanceLoading=signal(false);readonly attendanceError=signal<string|null>(null);readonly attendanceRows=signal<(StudentAttendanceRow&{offeringId:string;section:string})[]>([]);

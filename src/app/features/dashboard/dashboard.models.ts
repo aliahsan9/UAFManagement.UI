@@ -45,6 +45,34 @@ export interface DashboardSummary {
   employees: DashboardMetric;
   programs: DashboardMetric;
   activeSessions: DashboardMetric;
+  activeStudentCount: number | null;
+  activeEmployeeCount: number | null;
+  activeProgramCount: number | null;
   studentStatuses: { label: string; value: number; color: string }[] | null;
   dataUpdatedAt: Date;
+}
+
+export interface DashboardAnalytics {
+  generatedAtUtc: string;
+  students: { total: number; active: number };
+  admissions: { total: number; pending: number };
+  activeAcademicSessions: number;
+  finance: { outstandingBalance: number; currency: string };
+}
+
+export interface DashboardNotice {
+  id: string;
+  title: string;
+  message: string;
+  channel: number | string;
+  status: number | string;
+  createdAtUtc: string;
+  readAtUtc: string | null;
+}
+
+export interface DashboardActivity {
+  id: string;
+  action: string;
+  entityType: string;
+  occurredAtUtc: string;
 }

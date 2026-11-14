@@ -3,8 +3,8 @@ import { Injectable, inject } from '@angular/core';
 import { catchError, forkJoin, map, Observable, of } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import {
-  AcademicProgramSummary, AcademicSessionSummary, DashboardMetric,
-  DashboardSummary, EmployeeSummaryRecord, PagedResult, StudentSummaryRecord
+  AcademicProgramSummary, AcademicSessionSummary, DashboardActivity, DashboardAnalytics,
+  DashboardMetric, DashboardNotice, DashboardSummary, EmployeeSummaryRecord, PagedResult, StudentSummaryRecord
 } from './dashboard.models';
 
 @Injectable({ providedIn: 'root' })
@@ -60,6 +60,9 @@ export class DashboardService {
           result.sessions?.filter(session => session.status === 'Active' || session.status === 2).length ?? null,
           'Currently active academic sessions'
         ),
+        activeStudentCount: result.activeStudents,
+        activeEmployeeCount: result.activeEmployees,
+        activeProgramCount: result.programs ? result.programs.filter(program => program.isActive).length : null,
         studentStatuses,
         dataUpdatedAt: new Date()
       };
@@ -79,6 +82,24 @@ export class DashboardService {
 
   private getList<T>(path: string): Observable<T | null> {
     return this.http.get<T>(`${this.api}${path}`).pipe(catchError(() => of(null)));
+  }
+
+  getAnalytics(): Observable<DashboardAnalytics | null> {
+    return this.http.get<DashboardAnalytics>(`${this.api}/api/v1/analytics/dashboard`).pipe(catchError(() => of(null)));
+  }
+
+  getNotices(): Observable<DashboardNotice[] | null> {
+    const params = new HttpParams().set('page', '1').set('pageSize', '4');
+    return this.http.get<DashboardNotice[]>(`${this.api}/api/v1/notifications/`, { params }).pipe(catchError(() => of(null)));
+  }
+
+  getActivity(): Observable<DashboardActivity[] | null> {
+    const params = new HttpParams().set('page', '1').set('pageSize', '4');
+    return this.http.get<DashboardActivity[]>(`${this.api}/api/v1/audit-trail`, { params }).pipe(catchError(() => of(null)));
+  }
+
+  markNoticeRead(id: string): Observable<void> {
+    return this.http.patch<void>(`${this.api}/api/v1/notifications/${id}/read`, {});
   }
 
   private metric(value: number | null, description: string): DashboardMetric {
