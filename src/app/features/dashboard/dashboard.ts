@@ -1,4 +1,5 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
+import { DecimalPipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { DashboardService } from './dashboard.service';
 import { DashboardSummary } from './dashboard.models';
@@ -6,7 +7,7 @@ import { DashboardSummary } from './dashboard.models';
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [RouterLink],
+  imports: [RouterLink, DecimalPipe],
   template: `
     <section class="dashboard-page">
       <header class="dashboard-page__heading">
