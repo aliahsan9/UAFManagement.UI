@@ -52,3 +52,29 @@ npm test
 ```
 
 GitHub Actions runs the production build for feature branch pushes and pull requests.
+
+
+## Phase 2 — Admin dashboard
+
+The dashboard reads live figures from the existing backend resources; it does not use hardcoded demo statistics.
+
+| Dashboard metric | Backend resource | Aggregation |
+| --- | --- | --- |
+| Total students | `GET /api/v1/students/?page=1&pageSize=1` | `totalCount` |
+| Student standing breakdown | `GET /api/v1/students/` with `status` filters | Current counts for Active, Suspended, Graduated and Withdrawn |
+| Total employees | `GET /api/v1/employees/?page=1&pageSize=1` | `totalCount` |
+| Academic programs | `GET /api/v1/academic-structure/programs` | Returned program count |
+| Active academic sessions | `GET /api/v1/academic-sessions/` | Count of sessions with Active status |
+
+Each resource is handled independently. If an endpoint returns 403, 404, or a network error, its widget displays an unavailable state rather than a misleading zero. This is important because the backend applies separate authorization policies to student, employee, academic-structure, and catalog resources.
+
+### Dashboard capabilities not yet supported by the current API
+
+The following widgets are deliberately shown as API gaps instead of displaying invented figures:
+
+- **Admission statistics / pending decisions:** admission staff workflows and decision history exist, but there is no staff-wide paged admission-application listing or aggregate endpoint.
+- **Finance overview:** the API exposes student fee accounts and payment operations, but not institution-wide financial totals.
+- **Attendance overview:** reports are scoped to a course offering; no university-wide aggregate endpoint is exposed.
+- **Recent activities:** there is no consolidated activity-feed endpoint.
+
+For production-grade dashboard analytics, add an authorized, purpose-built endpoint such as `GET /api/v1/dashboard/summary` in the backend. It should return role-filtered aggregate metrics, time-series buckets, pending workflow counts, recent audit/activity entries, and generated-at metadata in one efficient read model. Avoid making the frontend fan out to every module as the dashboard grows.
