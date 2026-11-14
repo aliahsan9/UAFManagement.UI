@@ -16,6 +16,9 @@ import { NotificationService } from '../../core/services/notification.service';
  <a routerLink="/academic-structure/faculties" routerLinkActive="nav-link--active"><span>▤</span> Faculties</a>
  <a routerLink="/academic-structure/departments" routerLinkActive="nav-link--active"><span>▥</span> Departments</a>
  <a routerLink="/academic-structure/programs" routerLinkActive="nav-link--active"><span>▧</span> Academic programs</a>
+ <div class="sidebar-caption sidebar-caption--spaced">ACADEMIC CATALOG</div>
+ <a routerLink="/academic-sessions" routerLinkActive="nav-link--active"><span>▦</span> Academic sessions</a>
+ <a routerLink="/courses" routerLinkActive="nav-link--active"><span>▤</span> Courses</a>
  <div class="sidebar-caption sidebar-caption--spaced">OTHER MODULES</div>
  @for(item of modules;track item.name){<span class="nav-link nav-link--muted"><span>{{item.icon}}</span>{{item.name}}<small>SOON</small></span>}
  </nav><div class="sidebar-footer"><div class="sidebar-help-icon">?</div><div><strong>Need assistance?</strong><small>Contact your system administrator.</small></div></div><div class="sidebar-version">UAF PORTAL <span>v1.0</span></div>
