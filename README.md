@@ -250,3 +250,29 @@ The frontend does not attempt to replace backend conflict detection. On save, it
 - The backend models timetable entries as recurring weekly slots, not one-off dated meetings. The daily and weekly calendar views therefore evaluate each slot against its effective date range and weekday.
 - Room creation is supported, but no room update/deactivate endpoint is exposed in the timetable route group.
 - The API exposes no room-specific or date-window query for entries; the UI applies room and calendar filtering to the session-scoped/all entries returned by the backend. For large institutions, add server-side room/date filters and a paged timetable query.
+
+
+## Phase 10 — Attendance management
+
+Implemented under `src/app/features/attendance` against the backend `AttendanceEndpoints.cs`, `AttendanceModels.cs`, and `AttendanceReportModels.cs`.
+
+### Workflows
+- Attendance dashboard scoped to the selected course offering and currently loaded session.
+- Create a session for a course offering and date; load an existing session by its returned ID.
+- Bulk attendance table populated from the offering's currently enrolled students.
+- Exact backend enum values: Present=1, Absent=2, Late=3, Excused=4.
+- Per-student optional remarks map to backend `Reason`; saved response `Remarks` are rehydrated on session reload.
+- Save marks with PUT and finalize an open session with explicit confirmation.
+- Course attendance report with per-student counts, attendance percentage, searchable student summaries and below-threshold list.
+- Attendance policy read/configure per academic session (required percentage, late credit, exclude excused from denominator).
+
+### Backend contract / important API limits
+- `POST /sessions`, `GET /sessions/{id}`, `PUT /sessions/{id}/marks`, `POST /sessions/{id}/finalize`.
+- `GET /offerings/{offeringId}/report`.
+- Policy: `GET /policies/{academicSessionId}`, `PUT /policies/{academicSessionId}`.
+- The backend exposes no session collection/list endpoint, so the UI creates sessions and loads an existing session by ID; it does not invent a session-history API.
+- The backend exposes no standalone student attendance report endpoint; student summaries and below-threshold filtering are derived from the authoritative course report response.
+- Report calculation requires a configured attendance policy and only includes finalized sessions.
+- Student display names are resolved through the existing Students API; if its separate permission is absent, stable student IDs remain visible.
+- Attendance management requires `attendance.manage`; policy configuration additionally requires `attendance-policy.manage`. The policy form surfaces authorization failures returned by the server.
+- Server remains authoritative for offering assignment, duplicate session dates, mark eligibility, state transitions and report calculations.

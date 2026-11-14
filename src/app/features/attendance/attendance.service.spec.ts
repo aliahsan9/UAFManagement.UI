@@ -1,0 +1,14 @@
+import { TestBed } from '@angular/core/testing';
+import { provideHttpClient } from '@angular/common/http';
+import { HttpTestingController,provideHttpClientTesting } from '@angular/common/http/testing';
+import { afterEach,beforeEach,describe,expect,it } from 'vitest';
+import { environment } from '../../../environments/environment';
+import { AttendanceService } from './attendance.service';
+describe('AttendanceService',()=>{let api:AttendanceService;let http:HttpTestingController;const base=environment.apiBaseUrl+'/api/v1/attendance';
+ beforeEach(()=>{TestBed.configureTestingModule({providers:[provideHttpClient(),provideHttpClientTesting()]});api=TestBed.inject(AttendanceService);http=TestBed.inject(HttpTestingController);});afterEach(()=>http.verify());
+ it('creates a session and loads its details',()=>{const body={courseOfferingId:'offering-1',attendanceDate:'2026-11-14',topic:'Lecture'};api.createSession(body).subscribe();const create=http.expectOne(base+'/sessions');expect(create.request.method).toBe('POST');expect(create.request.body).toEqual(body);create.flush({id:'session-1'});api.getSession('session-1').subscribe();const get=http.expectOne(base+'/sessions/session-1');expect(get.request.method).toBe('GET');get.flush({id:'session-1'});});
+ it('saves all marks using PUT and backend status values',()=>{const body={marks:[{studentId:'student-1',status:1,reason:null},{studentId:'student-2',status:4,reason:'Medical'}]};api.markAttendance('session-1',body).subscribe();const r=http.expectOne(base+'/sessions/session-1/marks');expect(r.request.method).toBe('PUT');expect(r.request.body).toEqual(body);r.flush(null);});
+ it('finalizes a session',()=>{api.finalizeSession('session-1').subscribe();const r=http.expectOne(base+'/sessions/session-1/finalize');expect(r.request.method).toBe('POST');r.flush(null);});
+ it('gets and configures policy using the academic session id',()=>{api.getPolicy('academic-1').subscribe();const get=http.expectOne(base+'/policies/academic-1');expect(get.request.method).toBe('GET');get.flush({academicSessionId:'academic-1'});const body={requiredPercentage:75,lateCreditPercentage:50,excludeExcusedFromDenominator:true};api.configurePolicy('academic-1',body).subscribe();const put=http.expectOne(base+'/policies/academic-1');expect(put.request.method).toBe('PUT');expect(put.request.body).toEqual(body);put.flush({academicSessionId:'academic-1'});});
+ it('loads course attendance report',()=>{api.getOfferingReport('offering-1').subscribe();const r=http.expectOne(base+'/offerings/offering-1/report');expect(r.request.method).toBe('GET');r.flush({courseOfferingId:'offering-1',students:[]});});
+});
