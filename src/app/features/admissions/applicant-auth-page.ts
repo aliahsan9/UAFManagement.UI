@@ -1,11 +1,12 @@
 import { Component, inject, signal } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { finalize } from 'rxjs';
 import { AuthService } from '../../core/services/auth.service';
 import { NotificationService } from '../../core/services/notification.service';
 
-@Component({selector:'app-applicant-auth-page',standalone:true,imports:[ReactiveFormsModule,RouterLink],
+@Component({selector:'app-applicant-auth-page',standalone:true,imports:[CommonModule,ReactiveFormsModule,RouterLink],
  template:`<div class="applicant-auth-wrap"><div class="applicant-auth-card"><a routerLink="/applicant/login" class="applicant-brand"><span class="applicant-brand__mark">U</span><span><strong>UAF Admissions</strong><small>Applicant Portal</small></span></a><span class="eyebrow mt-4 d-block">APPLICANT SELF SERVICE</span><h1>{{isRegister?'Create applicant account':'Welcome back'}}</h1><p class="text-muted small">{{isRegister?'Register to start and manage your admission application.':'Sign in to continue your admission application.'}}</p><form [formGroup]="form" (ngSubmit)="submit()" class="mt-4"><div class="mb-3" *ngIf="isRegister"><label class="form-label">Full name</label><input class="form-control" formControlName="fullName" autocomplete="name"></div><div class="mb-3"><label class="form-label">Email address</label><input class="form-control" type="email" formControlName="email" autocomplete="email"></div><div class="mb-3"><label class="form-label">Password</label><input class="form-control" type="password" formControlName="password" autocomplete="current-password"></div>@if(error()){<div class="alert alert-danger py-2 small">{{error()}}</div>}<button class="btn btn-primary w-100" [disabled]="form.invalid||loading()">{{loading()?'Please wait…':isRegister?'Create account':'Sign in'}}</button></form><p class="text-center small mt-4 mb-0">@if(isRegister){Already registered? <a routerLink="/applicant/login">Sign in</a>}@else{New applicant? <a routerLink="/applicant/register">Create an account</a>}</p><div class="border-top mt-4 pt-3 text-center text-muted" style="font-size:11px">Secure access to your application and documents.</div></div></div>`})
 export class ApplicantAuthPage {
  private fb=inject(FormBuilder);private auth=inject(AuthService);private router=inject(Router);private route=inject(ActivatedRoute);private notices=inject(NotificationService);
