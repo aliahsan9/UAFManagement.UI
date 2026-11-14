@@ -21,6 +21,7 @@ const gradeRevisionApprovalPolicies=['Grading.GradeRevisionRequestManagement','G
 const financePolicies=['Finance.Management','Analytics.Read'];
 
 export const routes:Routes=[
+ {path:'',pathMatch:'full',canActivate:[authGuard],loadComponent:()=>import('./features/portals/portal-entry-page').then(m=>m.PortalEntryPage)},
  {path:'auth',loadComponent:()=>import('./features/auth/auth-layout/auth-layout').then(m=>m.AuthLayout),children:[{path:'login',loadComponent:()=>import('./features/auth/login/login').then(m=>m.Login)},{path:'register',loadComponent:()=>import('./features/auth/register/register').then(m=>m.Register)},{path:'',pathMatch:'full',redirectTo:'login'}]},
  {path:'applicant/login',loadComponent:()=>import('./features/admissions/applicant-auth-page').then(m=>m.ApplicantAuthPage),data:{mode:'login'}},
  {path:'applicant/register',loadComponent:()=>import('./features/admissions/applicant-auth-page').then(m=>m.ApplicantAuthPage),data:{mode:'register'}},
