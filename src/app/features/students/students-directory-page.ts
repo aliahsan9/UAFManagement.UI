@@ -1,4 +1,5 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
+import { DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { AcademicStructureService } from '../academic-structure/academic-structure.service';
@@ -7,7 +8,7 @@ import { StudentStatusBadge } from './student-status-badge';
 import { StudentsService } from './students.service';
 import { Student, StudentPage, StudentQuery, StudentStatus, STUDENT_STATUSES } from './students.models';
 
-@Component({selector:'app-students-directory-page',standalone:true,imports:[FormsModule,RouterLink,StudentStatusBadge],
+@Component({selector:'app-students-directory-page',standalone:true,imports:[FormsModule,RouterLink,StudentStatusBadge,DatePipe],
  template:`
  <section class="container-fluid py-3 student-module">
   <header class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4"><div><div class="text-uppercase small fw-semibold text-primary mb-1">STUDENT MANAGEMENT</div><h1 class="h3 mb-1">Student directory</h1><p class="text-muted mb-0">Search, review and manage registered student records.</p></div><a class="btn btn-primary" routerLink="/students/new">Create student</a></header>
