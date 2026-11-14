@@ -127,3 +127,25 @@ Session status values follow the backend enum: Planned=1, Active=2, Completed=3,
 Course creation selects an active department. Department ownership is immutable in the update DTO, so the department selector is locked during editing and no parent ID is sent on update. Credit hours are stored as decimal(4,2), so the UI accepts 0.01–10.00. Course descriptions are limited to 1,000 characters. Course codes are normalized to uppercase. The API can reject deactivation when draft or published offerings exist; the UI displays the backend error rather than silently changing the course.
 
 The course details response contains the department ID rather than a department display name. The UI resolves that ID against the existing academic-structure departments endpoint; no department names are fabricated. Note that this lookup endpoint has its own `academic-structure.manage` authorization policy, separate from `academic-catalog.manage`. The courses page handles a denied lookup explicitly and prevents course creation until the department options are available. All screens use the existing Bootstrap 5.3.8 styling system.
+
+## Phase 5 — Admissions management
+
+The admissions frontend is split into two experiences with separate route shells:
+
+- Applicant portal: /applicant/login, /applicant/register, /applicant/dashboard, /applicant/applications, create/edit draft, application details, document upload/download, submission readiness, submit/withdraw actions and application timeline.
+- Admissions staff portal: /admissions/staff, paged/filterable review queue, staff-created draft, application review, document verification/rejection, decision history, accept/reject/waitlist/withdraw, registration-series configuration and accepted-applicant conversion.
+
+The typed AdmissionsService maps to the existing backend endpoints in ApplicantAdmissionEndpoints.cs, AdmissionsEndpoints.cs, and AdmissionDocumentReviewEndpoints.cs. Applicant API calls remain scoped to the authenticated applicant by the backend. Staff routes use the Admissions.Staff permission; decision and registration configuration screens additionally require Admissions.Decision. Client guards are only a UX layer; API policies are authoritative.
+
+### Staff queue API gap closed in backend
+
+| Endpoint | Purpose |
+| --- | --- |
+| GET /api/v1/admissions/?status=&academicProgramId=&search=&page=1&pageSize=20 | Paged staff queue with optional status, program and applicant/application search filters |
+| GET /api/v1/admissions/{id} | Staff application detail including review and decision metadata |
+
+The query is implemented in the application service and EF Core repository, applies bounded page sizes (1–100), stable newest-first ordering, and returns items, page, pageSize, totalCount, and totalPages. Both endpoints inherit Admissions.Staff authorization from the route group. Applicant ownership endpoints remain separate and are not reused for staff access.
+
+Important configuration note: applicant draft creation requires an active AcademicProgramId. The current applicant form therefore accepts the program GUID rather than presenting a program-name selector; a dedicated applicant-authorized active-program lookup is a follow-up API enhancement. The registration-series form similarly uses the program GUID because the existing staff workflow exposes configuration but not a read endpoint for current series values.
+
+Document uploads use multipart form data and are restricted by the API to PDF/JPEG/PNG up to 10 MB. Submission readiness is derived from the configured required-document list and verified document statuses. The frontend does not claim an application is ready unless the backend readiness endpoint returns canSubmit=true.
