@@ -1,5 +1,5 @@
 import { Component,DestroyRef,OnInit,computed,inject,signal } from '@angular/core';
-import { DatePipe,DecimalPipe } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import { ActivatedRoute,RouterLink } from '@angular/router';
 import { FormBuilder,ReactiveFormsModule,Validators } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
@@ -15,7 +15,7 @@ import { CreateExaminationRequest,Examination,ExaminationListItem,ExaminationMar
 import { ExaminationsService } from './examinations.service';
 
 type MarkDraft={marksObtained:number|null;isAbsent:boolean;remarks:string};
-@Component({selector:'app-examinations-page',standalone:true,imports:[ReactiveFormsModule,DatePipe,DecimalPipe,RouterLink],template:`
+@Component({selector:'app-examinations-page',standalone:true,imports:[ReactiveFormsModule,DatePipe,RouterLink],template:`
 <section class="container-fluid px-0">
  <div class="d-flex flex-wrap justify-content-between align-items-end gap-3 mb-4"><div><div class="small text-uppercase fw-semibold text-primary mb-2">Academic operations / Examinations</div><h1 class="h3 fw-bold mb-1">{{approvalMode?'Examination approvals':'Examination management'}}</h1><p class="text-secondary mb-0">{{approvalMode?'Review submitted marks and publish approved results.':'Schedule assessments, enter marks and submit results for approval.'}}</p></div><button class="btn btn-outline-primary" type="button" (click)="refresh()" [disabled]="loading()">Refresh</button></div>
  @if(pageError()){<div class="alert alert-danger" role="alert">{{pageError()}}</div>}

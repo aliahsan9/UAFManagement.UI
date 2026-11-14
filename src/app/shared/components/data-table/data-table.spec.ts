@@ -11,7 +11,7 @@ describe('DataTable',()=>{
   fixture.detectChanges();
   fixture.componentInstance.sort({key:'name',label:'Name',sortable:true});
   fixture.detectChanges();
-  const cells=Array.from(fixture.nativeElement.querySelectorAll('tbody tr td:first-child')).map((x:Element)=>x.textContent?.trim());
+  const cells=Array.from(fixture.nativeElement.querySelectorAll('tbody tr td:first-child') as NodeListOf<Element>).map(x=>x.textContent?.trim());
   expect(cells).toEqual(['Alpha','Bravo']);
  });
  it('filters records using the search control',()=>{
