@@ -3,7 +3,7 @@ import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import {
- AdmissionApplication, AdmissionDecisionAudit, AdmissionDocument, ConfigureRegistrationSeries,
+ AdmissionApplication, ApplicantAcademicProgram, AdmissionDecisionAudit, AdmissionDocument, ConfigureRegistrationSeries,
  ConvertedStudent, CreateApplicantDraft, SubmissionReadiness, StaffApplicationPage,
  StaffAdmissionApplication, UpdateApplicantDraft, AdmissionStatus
 } from './admissions.models';
@@ -14,7 +14,7 @@ export class AdmissionsService {
  private readonly applicantUrl=environment.apiBaseUrl+'/api/v1/applicant/admissions';
  private readonly staffUrl=environment.apiBaseUrl+'/api/v1/admissions';
 
- getMyApplications():Observable<AdmissionApplication[]>{return this.http.get<AdmissionApplication[]>(this.applicantUrl+'/');}
+ getApplicantPrograms():Observable<ApplicantAcademicProgram[]>{return this.http.get<ApplicantAcademicProgram[]>(this.applicantUrl+'/programs');}\n getMyApplications():Observable<AdmissionApplication[]>{return this.http.get<AdmissionApplication[]>(this.applicantUrl+'/');}
  getMyApplication(id:string):Observable<AdmissionApplication>{return this.http.get<AdmissionApplication>(this.applicantUrl+'/'+encodeURIComponent(id));}
  createApplicantDraft(request:CreateApplicantDraft):Observable<AdmissionApplication>{return this.http.post<AdmissionApplication>(this.applicantUrl+'/',request);}
  updateApplicantDraft(id:string,request:UpdateApplicantDraft):Observable<void>{return this.http.put<void>(this.applicantUrl+'/'+encodeURIComponent(id),request);}
