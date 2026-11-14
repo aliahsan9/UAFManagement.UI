@@ -604,3 +604,43 @@ After standard login and registration, users are routed by backend role:
 - Unknown/unmapped role → `/forbidden`
 
 The root URL uses the same role-aware portal entry behavior. Applicant login remains on the applicant self-service route and verifies the backend Applicant policy after authentication.
+
+
+## Phase 16 — Shared component library
+
+The application now has a reusable, standalone component library under `src/app/shared/components`. Components use Angular standalone APIs, signal inputs/outputs, content projection where appropriate, and Bootstrap-compatible markup. Import only the components required by a feature; no shared NgModule or new third-party UI dependency is required.
+
+| Component | Public export | Responsibility |
+| --- | --- | --- |
+| DataTableComponent | `DataTableComponent` | Search, sortable columns, client-side pagination, loading/error/empty states, optional server-side page/sort/query events and row actions |
+| SearchFilterComponent | `SearchFilterComponent` | Search input and configurable select filters with clear/reset |
+| FormFieldComponent | `FormFieldComponent` | Consistent labels, required indicators, hints, validation messages and projected controls |
+| StatusBadgeComponent | `StatusBadgeComponent` | Semantic workflow status labels and tones; retains the legacy active/inactive input |
+| ConfirmDialogComponent | `ConfirmDialogComponent` | Shared confirmation surface backed by the existing Promise-based ConfirmationService; Escape and backdrop dismiss safely |
+| FileUploadComponent | `FileUploadComponent` | Single/multiple file selection, accepted-type checks, size and count limits, disabled/uploading states |
+| FilePreviewComponent | `FilePreviewComponent` | Safe link-based document preview and inline image preview |
+| DateRangePickerComponent | `DateRangePickerComponent` | Accessible start/end date selection with range validation |
+| PaginationComponent | `PaginationComponent` | Reusable page navigation and item range summary |
+| EmptyStateComponent | `EmptyStateComponent` | Configurable no-data messaging and projected actions |
+| LoadingSpinnerComponent | `LoadingSpinnerComponent` | Consistent accessible loading indicator |
+| ErrorStateComponent | `ErrorStateComponent` | API failure message and optional retry action |
+| ToastService | `ToastService` | Public shared toast facade over the existing NotificationService singleton |
+| AuditTimelineComponent | `AuditTimelineComponent` | Chronological decision, revision and audit event history |
+| StatsCardComponent | `StatsCardComponent` | Dashboard metric card with optional description/trend |
+| ChartComponent | `ChartComponent` | Lightweight accessible analytics bar chart without a new chart dependency |
+| FilterDropdownComponent | `FilterDropdownComponent` | Reusable typed select filter |
+
+### Usage and architecture
+
+- Import standalone components directly into a consuming standalone component's `imports` array, or use the public exports in `src/app/shared/components/index.ts`.
+- Shared components are presentation primitives. Feature services own API calls, DTOs, server filtering, authorization decisions and business rules.
+- The table supports local filtering/sorting/pagination by default. Set `serverSide=true` and provide `totalItems` to use `queryChange`, `sortChange` and `pageChange` for server-driven data.
+- File upload validates UX-level extension/MIME, size and count constraints. The API must independently validate content, signatures, authorization, malware policy and storage limits; browser validation is not a security boundary.
+- File preview uses the supplied URL and does not bypass Angular URL sanitization. Only pass URLs returned by an authorized backend operation.
+- `ToastService` is an export alias of the existing `NotificationService`, so existing feature notifications and the global toast container continue to share the same singleton state.
+- Existing `DataTable`, `StatusBadge`, confirmation and notification consumers remain compatible. Academic structure now consumes the shared table loading, error and empty states; admissions document upload reuses the generic file selector.
+- No generic component makes an API request or grants access to data. Backend policies and API validation remain authoritative.
+
+### Shared component tests
+
+Vitest coverage includes table sorting, filtering, pagination and loading/empty rendering, plus status label/tone behavior and backwards compatibility for active/inactive badges.

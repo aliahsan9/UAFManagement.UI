@@ -1,0 +1,3 @@
+import {Component,input} from '@angular/core';
+@Component({selector:'app-empty-state',standalone:true,template:`<section class="text-center py-5 px-3" role="status"><div class="mx-auto mb-3 rounded-circle bg-body-secondary d-grid place-items-center" style="width:52px;height:52px"><span class="fs-4 text-secondary" aria-hidden="true">{{icon()}}</span></div><h3 class="h6 fw-semibold mb-1">{{title()}}</h3><p class="small text-secondary mb-0">{{description()}}</p><ng-content/></section>`})
+export class EmptyState {readonly title=input('Nothing here yet');readonly description=input('There are no records to display.');readonly icon=input('—');}

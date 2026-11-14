@@ -1,0 +1,3 @@
+import {Component,input} from '@angular/core';
+@Component({selector:'app-form-field',standalone:true,template:`<div class="mb-3"><label class="form-label fw-semibold small" [attr.for]="forId()">{{label()}}@if(required()){<span class="text-danger ms-1" aria-hidden="true">*</span>}</label><ng-content/><div class="form-text" [hidden]="!hint()">{{hint()}}</div>@if(error()){<div class="invalid-feedback d-block" role="alert">{{error()}}</div>}</div>`})
+export class FormField {readonly label=input.required<string>();readonly forId=input<string|undefined>(undefined);readonly hint=input('');readonly error=input('');readonly required=input(false);}
