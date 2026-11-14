@@ -1,5 +1,5 @@
 import { Component,DestroyRef,OnInit,inject,signal,computed } from '@angular/core';
-import { CurrencyPipe,DatePipe,DecimalPipe } from '@angular/common';
+import { CurrencyPipe,DatePipe } from '@angular/common';
 import { FormBuilder,ReactiveFormsModule,Validators } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -9,7 +9,7 @@ import { FinanceService } from './finance.service';
 import { FeeHeadOption,FeeStructureDraft,StudentFeeAccount,FeeChallan,FeePayment,FeeTab,paymentStatusLabel,challanStatusLabel,isPaymentPending } from './finance.models';
 
 interface DashboardAnalytics { generatedAtUtc:string; students:{total:number;active:number}; finance:{outstandingBalance:number;currency:string}; }
-@Component({selector:'app-finance-page',standalone:true,imports:[ReactiveFormsModule,CurrencyPipe,DatePipe,DecimalPipe],template:`
+@Component({selector:'app-finance-page',standalone:true,imports:[ReactiveFormsModule,CurrencyPipe,DatePipe],template:`
 <section class="container-fluid px-0">
  <header class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4"><div><div class="small text-uppercase fw-semibold text-primary mb-2">Finance / Fee administration</div><h1 class="h3 fw-bold mb-1">Finance & fee management</h1><p class="text-secondary mb-0">Configure fee heads and structures, issue student challans, record payments and verify receipts.</p></div><button class="btn btn-outline-secondary" (click)="refresh()" [disabled]="busy()"><span class="me-1">↻</span> Refresh data</button></header>
  @if(error()){<div class="alert alert-danger" role="alert">{{error()}}</div>}
