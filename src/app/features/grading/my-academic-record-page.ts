@@ -1,5 +1,6 @@
 import { Component,DestroyRef,OnInit,computed,inject,signal } from '@angular/core';
 import { DatePipe,DecimalPipe } from '@angular/common';
+import { RouterLink } from '@angular/router';
 import { FormBuilder,ReactiveFormsModule,Validators } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { HttpErrorResponse } from '@angular/common/http';
@@ -8,9 +9,9 @@ import { NotificationService } from '../../core/services/notification.service';
 import { GradingService } from './grading.service';
 import { AcademicRecordCourse,GradeAppeal,GradeRevision,GradeRevisionRequest,StudentAcademicRecord,appealStatusLabel } from './grading.models';
 
-@Component({selector:'app-my-academic-record-page',standalone:true,imports:[ReactiveFormsModule,DatePipe,DecimalPipe],template:`
+@Component({selector:'app-my-academic-record-page',standalone:true,imports:[ReactiveFormsModule,DatePipe,DecimalPipe,RouterLink],template:`
 <section class="container-fluid px-0">
- <header class="mb-4"><div class="small text-uppercase fw-semibold text-primary mb-2">Student portal / Academic performance</div><h1 class="h3 fw-bold mb-1">My academic record</h1><p class="text-secondary mb-0">Your finalized course grades, semester GPA, cumulative GPA and grade review requests.</p><a class="btn btn-sm btn-outline-primary mt-3" href="/my-transcripts">View my transcripts</a></header>
+ <header class="mb-4"><div class="small text-uppercase fw-semibold text-primary mb-2">Student portal / Academic performance</div><h1 class="h3 fw-bold mb-1">My academic record</h1><p class="text-secondary mb-0">Your finalized course grades, semester GPA, cumulative GPA and grade review requests.</p><a class="btn btn-sm btn-outline-primary mt-3" routerLink="/my-transcripts">View my transcripts</a></header>
  @if(error()){<div class="alert alert-danger">{{error()}}</div>}
  @if(loading()){<div class="card border-0 shadow-sm"><div class="card-body text-center py-5"><span class="spinner-border spinner-border-sm me-2"></span>Loading academic record…</div></div>}
  @else if(record(); as r){
