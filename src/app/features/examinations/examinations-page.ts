@@ -1,6 +1,6 @@
 import { Component,DestroyRef,OnInit,computed,inject,signal } from '@angular/core';
 import { DatePipe,DecimalPipe } from '@angular/common';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute,RouterLink } from '@angular/router';
 import { FormBuilder,ReactiveFormsModule,Validators } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -15,7 +15,7 @@ import { CreateExaminationRequest,Examination,ExaminationListItem,ExaminationMar
 import { ExaminationsService } from './examinations.service';
 
 type MarkDraft={marksObtained:number|null;isAbsent:boolean;remarks:string};
-@Component({selector:'app-examinations-page',standalone:true,imports:[ReactiveFormsModule,DatePipe,DecimalPipe],template:`
+@Component({selector:'app-examinations-page',standalone:true,imports:[ReactiveFormsModule,DatePipe,DecimalPipe,RouterLink],template:`
 <section class="container-fluid px-0">
  <div class="d-flex flex-wrap justify-content-between align-items-end gap-3 mb-4"><div><div class="small text-uppercase fw-semibold text-primary mb-2">Academic operations / Examinations</div><h1 class="h3 fw-bold mb-1">{{approvalMode?'Examination approvals':'Examination management'}}</h1><p class="text-secondary mb-0">{{approvalMode?'Review submitted marks and publish approved results.':'Schedule assessments, enter marks and submit results for approval.'}}</p></div><button class="btn btn-outline-primary" type="button" (click)="refresh()" [disabled]="loading()">Refresh</button></div>
  @if(pageError()){<div class="alert alert-danger" role="alert">{{pageError()}}</div>}
@@ -51,7 +51,7 @@ type MarkDraft={marksObtained:number|null;isAbsent:boolean;remarks:string};
        <div class="d-flex justify-content-between small text-secondary"><span>Maximum: {{selected()!.maximumMarks}} · Passing: {{selected()!.passingMarks}}</span><span>{{roster().length}} enrolled students</span></div>
       }
     }
-    @if(statusOf(selected()!)===ExaminationStatus.Published){<button class="btn btn-sm btn-outline-primary" (click)="loadResults()">View published results</button>}
+    @if(statusOf(selected()!)===ExaminationStatus.Published){<a class="btn btn-sm btn-outline-primary" [routerLink]="['/examinations',selected()!.id,'results']">View results page</a><button class="btn btn-sm btn-outline-secondary" (click)="loadResults()">Quick preview</button>}
     }@else{
       @if(statusOf(selected()!)===ExaminationStatus.Submitted){<div class="alert alert-warning small">Submitted by {{selected()!.submittedByUserId||'—'}} on {{selected()!.submittedAtUtc|date:'medium'}}. The submitter cannot approve their own examination.</div><button class="btn btn-sm btn-success" (click)="transition('approve')">Approve results</button>}
       @if(statusOf(selected()!)===ExaminationStatus.Approved){<div class="alert alert-info small">Approved on {{selected()!.approvedAtUtc|date:'medium'}}. Publication is a separate, irreversible workflow action.</div><button class="btn btn-sm btn-primary" (click)="transition('publish')">Publish results</button>}
