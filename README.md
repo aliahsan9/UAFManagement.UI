@@ -276,3 +276,46 @@ Implemented under `src/app/features/attendance` against the backend `AttendanceE
 - Student display names are resolved through the existing Students API; if its separate permission is absent, stable student IDs remain visible.
 - Attendance management requires `attendance.manage`; policy configuration additionally requires `attendance-policy.manage`. The policy form surfaces authorization failures returned by the server.
 - Server remains authoritative for offering assignment, duplicate session dates, mark eligibility, state transitions and report calculations.
+
+
+## Phase 11 — Examination management
+
+Implemented in `src/app/features/examinations` against the actual `ExaminationEndpoints.cs`, `ExaminationModels.cs`, `ExaminationType` and `ExaminationStatus` contracts.
+
+### Examination management
+
+- `/examinations`: offering-scoped dashboard and examination list, create draft, details, schedule, open marks entry, bulk marks table, save marks and submit.
+- Examination types use backend enum values: Quiz=1, Assignment=2, Midterm=3, Final=4, Practical=5, Project=6.
+- Lifecycle values use backend enum values: Draft=1, Scheduled=2, MarksEntryOpen=3, Submitted=4, Approved=5, Published=6, Cancelled=7.
+- Marks table displays registration number, student name, marks obtained, absent flag and remarks. Client validation enforces 0..maximum marks and absent=0; server validation remains authoritative.
+- Each save requires an audit reason because the backend requires a non-empty `Reason` on every `ExaminationMarkItem`. Student remarks are sent separately in `Remarks`.
+- Results are loaded only after publication.
+
+### Separate approval and publication workflow
+
+- `/examinations/approvals` is a separate route and screen for submitted-result approval and approved-result publication.
+- Examination management route requires `examinations.manage`.
+- Approval route requires both `examinations.manage` (the backend applies this policy to examination list/detail reads) and `examinations.approve` (the backend applies its separate ExaminationApproval policy to approve/publish commands).
+- The backend rejects self-approval when the submitting user attempts to approve their own results. The UI explains this and displays the submitter identity.
+
+### Actual backend API mapping
+
+| UI operation | API |
+| --- | --- |
+| Create draft | `POST /api/v1/examinations/` |
+| Offering examination list | `GET /api/v1/examinations/offerings/{offeringId}` |
+| Examination details | `GET /api/v1/examinations/{id}` |
+| Schedule | `POST /api/v1/examinations/{id}/schedule` |
+| Open marks entry | `POST /api/v1/examinations/{id}/open-marks-entry` |
+| Save marks | `PUT /api/v1/examinations/{id}/marks` |
+| Submit | `POST /api/v1/examinations/{id}/submit` |
+| Approve | `POST /api/v1/examinations/{id}/approve` |
+| Publish | `POST /api/v1/examinations/{id}/publish` |
+| Published results | `GET /api/v1/examinations/{id}/results` |
+
+### API constraints surfaced in the UI
+
+- The backend exposes no examination update/delete/cancel endpoint and no examination-wide list; listing is scoped to a selected course offering.
+- The examination detail response does not include draft marks, and there is no marks-read endpoint before publication. The UI therefore cannot prefill already-saved marks when an operator reloads an open marks-entry screen; it does not fabricate saved values.
+- Approval and publication have separate backend authorization policies. The backend has no approval-queue listing endpoint; the approval screen uses the management-protected offering list/detail reads and therefore needs both read/manage and approval permissions.
+- The backend enforces course-offering ownership, academic-session date boundaries, lifecycle transitions, maximum marks, absent=zero, mandatory audit reasons, and separation of duties. Client checks improve feedback but do not replace those validations.
