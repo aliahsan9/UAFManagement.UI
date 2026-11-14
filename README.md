@@ -319,3 +319,70 @@ Implemented in `src/app/features/examinations` against the actual `ExaminationEn
 - The examination detail response does not include draft marks, and there is no marks-read endpoint before publication. The UI therefore cannot prefill already-saved marks when an operator reloads an open marks-entry screen; it does not fabricate saved values.
 - Approval and publication have separate backend authorization policies. The backend has no approval-queue listing endpoint; the approval screen uses the management-protected offering list/detail reads and therefore needs both read/manage and approval permissions.
 - The backend enforces course-offering ownership, academic-session date boundaries, lifecycle transitions, maximum marks, absent=zero, mandatory audit reasons, and separation of duties. Client checks improve feedback but do not replace those validations.
+
+
+## Phase 12 — Grading and GPA management
+
+Implemented in `src/app/features/grading` against the backend `GradingEndpoints.cs`, `GradeAppealEndpoints.cs`, `GradeRevisionEndpoints.cs` and their application DTOs.
+
+### Grade scale management — `/grading/scales`
+
+- Academic-session selector and session-specific grade scale lookup.
+- Grade scale builder with configurable name, failed-course GPA inclusion and repeat-course policy.
+- Grade band editor: letter grade, minimum percentage, grade points and passing criterion.
+- Client validation mirrors backend invariants: 1–30 bands, unique letter grades and thresholds, at least one 0% band, percentage 0–100, grade points 0–10.
+- Publish scale with explicit confirmation. Published scales are immutable and are required before finalization.
+- Repeat-course policies match backend enum values: AllAttempts=1, LatestAttempt=2, HighestGrade=3.
+
+### Course grade finalization — `/grading/finalization`
+
+- Select published or closed course offerings and load eligible Enrolled / Completed enrollments.
+- Finalize each student independently using published examination assessments and the published session scale.
+- Show returned course-grade details: marks, percentage, letter grade, grade points and pass/fail.
+- Backend remains authoritative for course offering ownership, department permissions, published assessments, scale publication, duplicate finalization and transactional grade creation.
+
+### Student GPA and grade appeal portal — `/my-academic-record`
+
+- Student-only route backed by `GET /api/v1/academic-records/me`.
+- Cumulative GPA and credit-hour summary, semester GPA cards, GPA history chart and course grade details.
+- Student grade appeal form and appeal history/status table.
+- Per-course revision request and approved revision history, using the student-only course-grade history endpoints.
+
+### Staff appeal and revision workflows
+
+- `/grading/appeals`: pending appeal queue, appeal reason, required decision remarks, approve/reject confirmation and append-only appeal history.
+- `/grading/revisions`: submit a revision request with course grade ID, approved appeal ID, proposed marks and reason; view pending requests.
+- `/grading/revisions/approvals`: separate revision approval route, required decision remarks and before/after comparison of marks, percentage, letter grade, grade points and pass status.
+- Separate permission guards mirror backend permission names:
+  - `grading-scales.manage`
+  - `course-grades.manage`
+  - `grade-appeals.review`
+  - `grade-revisions.manage`
+  - `grade-revisions.approve`
+  - Student academic-record routes require the `Student` role.
+
+### Actual endpoint mapping
+
+| UI operation | API |
+| --- | --- |
+| Get scale for session | `GET /api/v1/grading/scales/sessions/{academicSessionId}` |
+| Create scale | `POST /api/v1/grading/scales/` |
+| Publish scale | `POST /api/v1/grading/scales/{scaleId}/publish` |
+| Finalize student course grade | `POST /api/v1/grading/offerings/{offeringId}/students/{studentId}/finalize` |
+| My academic record / GPA | `GET /api/v1/academic-records/me` |
+| Submit / list my appeals | `POST/GET /api/v1/academic-records/me/grade-appeals/` |
+| Pending staff appeals | `GET /api/v1/grading/grade-appeals/pending` |
+| Appeal history / decision | `GET /api/v1/grading/grade-appeals/{appealId}/history`; `POST /api/v1/grading/grade-appeals/{appealId}/decision` |
+| Request grade revision / pending requests | `POST /api/v1/grading/grades/{gradeId}/revision-requests`; `GET /api/v1/grading/revision-requests/pending` |
+| Decide revision | `POST /api/v1/grading/revision-requests/{requestId}/decision` |
+| My revision requests / history | `GET /api/v1/academic-records/me/course-grades/{gradeId}/revision-requests`; `GET /api/v1/academic-records/me/course-grades/{gradeId}/revisions` |
+
+### Backend limitations surfaced instead of inventing APIs
+
+- No all-scales collection endpoint: scales are loaded by academic session. The backend permits one scale per session.
+- No course-grade list or detail endpoint for staff: finalization returns the grade details; the student academic record returns that student's own course-grade attempts.
+- No staff endpoint to fetch another student's GPA record; the academic record endpoint is restricted to the authenticated Student role.
+- No approved-appeals collection or appeal detail endpoint. After approval, the UI surfaces the appeal and course-grade IDs so an authorized revision officer can submit a request.
+- No staff grade-revision history endpoint. Students can view their own requests and approved revisions per course grade.
+- GPA and repeat-course calculations are server-derived. The chart visualizes returned semester GPAs and never recalculates them in the browser.
+- Duplicate grade finalization is rejected by the backend. Because no grade-read endpoint exists for staff, the UI cannot preload previously finalized rows after refresh.
