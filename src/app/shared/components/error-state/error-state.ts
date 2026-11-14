@@ -1,0 +1,3 @@
+import {Component,input,output} from '@angular/core';
+@Component({selector:'app-error-state',standalone:true,template:`<section class="alert alert-danger d-flex flex-wrap align-items-center justify-content-between gap-3 mb-0" role="alert"><div><strong class="d-block">{{title()}}</strong><span class="small">{{message()}}</span></div>@if(retry.observed){<button type="button" class="btn btn-sm btn-outline-danger" (click)="retry.emit()">Try again</button>}</section>`})
+export class ErrorState {readonly title=input('Unable to load data');readonly message=input('Please try again.');readonly retry=output<void>();}
