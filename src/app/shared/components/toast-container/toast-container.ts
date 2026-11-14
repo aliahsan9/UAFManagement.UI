@@ -1,5 +1,5 @@
 import { Component, inject } from '@angular/core';
-import { NotificationService } from '../../../core/services/notification.service';
+import { ToastService } from '../../../core/services/toast.service';
 @Component({
   selector:'app-toast-container', standalone:true,
   template:`<section class="toast-stack" aria-live="polite">@for (item of notices.items(); track item.id) {
@@ -10,4 +10,4 @@ import { NotificationService } from '../../../core/services/notification.service
     </article>
   }</section>`
 })
-export class ToastContainer { readonly notices = inject(NotificationService); }
+export class ToastContainer { readonly notices = inject(ToastService); }
