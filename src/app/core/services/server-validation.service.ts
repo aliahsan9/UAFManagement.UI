@@ -21,7 +21,7 @@ export class ServerValidationService {
   return {fields,summary};
  }
  clear(form:FormGroup):void{
-  const clearControl=(control:AbstractControl):void=>{if(control instanceof FormGroup)Object.values(control.controls).forEach(clearControl);if(control.errors?.['server']){const {server:_server,...remaining}=control.errors;control.setErrors(Object.keys(remaining).length?remaining:null);}};
+  const clearControl=(control:AbstractControl):void=>{if(control instanceof FormGroup)Object.values(control.controls).forEach(clearControl);if(control.errors?.['server']){const remaining={...control.errors};delete remaining['server'];control.setErrors(Object.keys(remaining).length?remaining:null);}};
   clearControl(form);
  }
 }
