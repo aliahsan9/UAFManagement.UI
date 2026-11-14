@@ -32,6 +32,7 @@ export const routes:Routes=[
   {path:'applications/:id/readiness',loadComponent:()=>import('./features/admissions/applicant-application-details').then(m=>m.ApplicantApplicationDetails)},
   {path:'applications/:id',loadComponent:()=>import('./features/admissions/applicant-application-details').then(m=>m.ApplicantApplicationDetails)},
   {path:'',pathMatch:'full',redirectTo:'dashboard'}]},
+ {path:'transcript-verification/:verificationCode',loadComponent:()=>import('./features/transcripts/transcript-verification-page').then(m=>m.TranscriptVerificationPage)},
  {path:'',canActivate:[authGuard],canActivateChild:[roleGuard],loadComponent:()=>import('./layouts/admin-layout/admin-layout').then(m=>m.AdminLayout),children:[
   {path:'dashboard',loadComponent:()=>import('./features/dashboard/dashboard').then(m=>m.Dashboard)},
   {path:'academic-structure/universities',loadComponent:()=>import('./features/academic-structure/academic-structure-page').then(m=>m.AcademicStructurePage),data:{entity:'universities',permissions:academicPermissions}},
@@ -55,6 +56,8 @@ export const routes:Routes=[
   {path:'grading/revisions/approvals',loadComponent:()=>import('./features/grading/grading-management-page').then(m=>m.GradingManagementPage),data:{mode:'revisionApprovals',permissions:gradeRevisionApprovalPermissions}},
   {path:'grading/revisions',loadComponent:()=>import('./features/grading/grading-management-page').then(m=>m.GradingManagementPage),data:{mode:'revisions',permissions:gradeRevisionRequestPermissions}},
   {path:'my-academic-record',loadComponent:()=>import('./features/grading/my-academic-record-page').then(m=>m.MyAcademicRecordPage),data:{roles:['Student']}},
+  {path:'my-transcripts',loadComponent:()=>import('./features/transcripts/my-transcripts-page').then(m=>m.MyTranscriptsPage),data:{roles:['Student']}},
+  {path:'transcripts/issue',loadComponent:()=>import('./features/transcripts/transcript-issuance-page').then(m=>m.TranscriptIssuancePage),data:{permissions:['transcripts.issue']}},
   {path:'examinations/:id/results',loadComponent:()=>import('./features/examinations/examination-results-page').then(m=>m.ExaminationResultsPage),data:{permissions:examinationPermissions}},
   {path:'examinations/approvals',loadComponent:()=>import('./features/examinations/examinations-page').then(m=>m.ExaminationsPage),data:{mode:'approval',permissions:examinationApprovalPermissions}},
   {path:'examinations',loadComponent:()=>import('./features/examinations/examinations-page').then(m=>m.ExaminationsPage),data:{permissions:examinationPermissions}},
