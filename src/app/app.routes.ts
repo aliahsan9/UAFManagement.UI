@@ -5,6 +5,7 @@ const academicPermissions=['academic-structure.manage'];
 const catalogPermissions=['academic-catalog.manage'];
 const admissionsStaffPermissions=['Admissions.Staff'];
 const admissionsDecisionPermissions=['Admissions.Staff','Admissions.Decision'];
+const studentPermissions=['students.manage'];
 export const routes:Routes=[
  {path:'auth',loadComponent:()=>import('./features/auth/auth-layout/auth-layout').then(m=>m.AuthLayout),children:[{path:'login',loadComponent:()=>import('./features/auth/login/login').then(m=>m.Login)},{path:'register',loadComponent:()=>import('./features/auth/register/register').then(m=>m.Register)},{path:'',pathMatch:'full',redirectTo:'login'}]},
  {path:'applicant/login',loadComponent:()=>import('./features/admissions/applicant-auth-page').then(m=>m.ApplicantAuthPage),data:{mode:'login'}},
@@ -28,6 +29,10 @@ export const routes:Routes=[
   {path:'academic-structure/programs',loadComponent:()=>import('./features/academic-structure/academic-structure-page').then(m=>m.AcademicStructurePage),data:{entity:'programs',permissions:academicPermissions}},
   {path:'academic-sessions',loadComponent:()=>import('./features/academic-catalog/academic-sessions-page').then(m=>m.AcademicSessionsPage),data:{permissions:catalogPermissions}},
   {path:'courses',loadComponent:()=>import('./features/academic-catalog/courses-page').then(m=>m.CoursesPage),data:{permissions:catalogPermissions}},
+  {path:'students',loadComponent:()=>import('./features/students/students-directory-page').then(m=>m.StudentsDirectoryPage),data:{permissions:studentPermissions}},
+  {path:'students/new',loadComponent:()=>import('./features/students/student-form-page').then(m=>m.StudentFormPage),data:{permissions:studentPermissions}},
+  {path:'students/:id/edit',loadComponent:()=>import('./features/students/student-form-page').then(m=>m.StudentFormPage),data:{permissions:studentPermissions}},
+  {path:'students/:id',loadComponent:()=>import('./features/students/student-details-page').then(m=>m.StudentDetailsPage),data:{permissions:studentPermissions}},
   {path:'admissions/staff',loadComponent:()=>import('./features/admissions/admissions-staff-dashboard').then(m=>m.AdmissionsStaffDashboard),data:{permissions:admissionsStaffPermissions}},
   {path:'admissions/staff/applications',loadComponent:()=>import('./features/admissions/admissions-staff-queue').then(m=>m.AdmissionsStaffQueue),data:{permissions:admissionsStaffPermissions}},
   {path:'admissions/staff/applications/new',loadComponent:()=>import('./features/admissions/admissions-staff-draft').then(m=>m.AdmissionsStaffDraft),data:{permissions:admissionsStaffPermissions}},
