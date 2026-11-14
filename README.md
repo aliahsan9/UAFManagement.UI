@@ -652,7 +652,7 @@ The feature-scoped services remain the owners of module contracts and DTOs. Shar
 
 - Access tokens stay in memory. Refresh tokens remain HttpOnly cookies. A protected 401 triggers one shared refresh attempt and one request retry; failed refresh returns the user to sign-in. 403 is surfaced and route guards continue to enforce policy-aware navigation for UX only.
 - `X-Correlation-ID` is attached to requests and response IDs are retained for diagnostics. The API CORS policy supports this header and exposes it to the browser.
-- `Idempotency-Key` is opt-in and validated as 1–128 printable ASCII characters. Finance mutations, attendance session creation/finalization and official transcript issuance use it. A caller can pass a stable key to reuse across a retry; never reuse a key with a different payload.
+- `Idempotency-Key` is opt-in and validated as 1–128 printable ASCII characters. Finance mutations, admission submission/review/decision/conversion commands, attendance session creation/finalization and official transcript issuance use it. A caller can pass a stable key to reuse across a retry; never reuse a key with a different payload.
 - `ServerValidationService` maps backend Problem Details field errors onto Reactive Form controls and returns unmatched messages for a form summary.
 - HTTP 409 advises reloading stale data; HTTP 429 surfaces the server `Retry-After` value; network/server failures include the correlation reference where available.
 - Existing module services and DTOs remain feature-scoped. Admissions staff list already uses supported page/pageSize/status/program/search query fields. Use DataTable server-side mode only where an endpoint supports its documented paging, sorting and filtering contract.
