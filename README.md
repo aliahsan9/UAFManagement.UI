@@ -146,6 +146,6 @@ The typed AdmissionsService maps to the existing backend endpoints in ApplicantA
 
 The query is implemented in the application service and EF Core repository, applies bounded page sizes (1–100), stable newest-first ordering, and returns items, page, pageSize, totalCount, and totalPages. Both endpoints inherit Admissions.Staff authorization from the route group. Applicant ownership endpoints remain separate and are not reused for staff access.
 
-Important configuration note: applicant draft creation requires an active AcademicProgramId. The current applicant form therefore accepts the program GUID rather than presenting a program-name selector; a dedicated applicant-authorized active-program lookup is a follow-up API enhancement. The registration-series form similarly uses the program GUID because the existing staff workflow exposes configuration but not a read endpoint for current series values.
+The applicant portal uses the applicant-authorized GET /api/v1/applicant/admissions/programs lookup to populate a real active-program selector. The registration-series and staff-created draft forms currently accept the academic program GUID because the staff workflow does not expose a registration-series read endpoint or program-name lookup.
 
 Document uploads use multipart form data and are restricted by the API to PDF/JPEG/PNG up to 10 MB. Submission readiness is derived from the configured required-document list and verified document statuses. The frontend does not claim an application is ready unless the backend readiness endpoint returns canSubmit=true.
