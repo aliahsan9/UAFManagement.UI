@@ -11,6 +11,6 @@ export interface FeePayment { id:string; challanId:string; amount:number; method
 export interface StudentFeeAccount { studentId:string; totalOutstanding:number; challans:FeeChallan[]; payments:FeePayment[]; }
 export interface FeeStructureDraft { id:string; name:string; academicProgramId:string; academicSessionId:string; semesterNumber:number; items:FeeStructureItemRequest[]; isPublished:boolean; }
 export type FeeTab='overview'|'heads'|'structures'|'challans'|'accounts';
-export function paymentStatusLabel(status:string):string { const key=status.toLowerCase(); return ({pending:'Pending verification',verified:'Verified',rejected:'Rejected'} as Record<string,string>)[key]??status; }
-export function challanStatusLabel(status:string):string { const key=status.toLowerCase(); return ({pending:'Unpaid',partiallypaid:'Partially paid',paid:'Paid',overdue:'Overdue',cancelled:'Cancelled'} as Record<string,string>)[key]??status; }
-export function isPaymentPending(status:string):boolean { return status.toLowerCase()==='pending'; }
+export function paymentStatusLabel(status:string):string { const key=status.toLowerCase(); return ({pending:'Pending verification',pendingverification:'Pending verification',verified:'Verified',rejected:'Rejected'} as Record<string,string>)[key]??status; }
+export function challanStatusLabel(status:string):string { const key=status.toLowerCase(); return ({issued:'Issued / unpaid',partiallypaid:'Partially paid',paid:'Paid',overdue:'Overdue',cancelled:'Cancelled'} as Record<string,string>)[key]??status; }
+export function isPaymentPending(status:string):boolean { return ['pending','pendingverification'].includes(status.toLowerCase()); }
