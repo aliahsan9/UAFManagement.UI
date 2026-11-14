@@ -2,12 +2,12 @@ export enum AdmissionStatus { Draft=1, Submitted=2, UnderReview=3, Accepted=4, R
 export enum AdmissionDocumentType { IdentityDocument=1, AcademicTranscript=2, Photograph=3, Other=4 }
 export enum AdmissionDocumentStatus { Pending=1, Verified=2, Rejected=3 }
 
-export interface ApplicantApplication {
+export interface AdmissionApplication {
   id:string; applicationNumber:string; applicantFullName:string; applicantEmail:string; phoneNumber:string|null;
   academicProgramId:string; applicationDate:string; status:AdmissionStatus; decisionRemarks:string|null;
   createdAtUtc:string; updatedAtUtc:string|null;
 }
-export interface StaffAdmissionApplication extends ApplicantApplication {
+export interface StaffAdmissionApplication extends AdmissionApplication {
   ownerUserId:string|null; reviewStartedByUserId:string|null; reviewStartedAtUtc:string|null;
   decisionByUserId:string|null; decisionAtUtc:string|null;
 }
@@ -52,3 +52,5 @@ export function admissionStatusLabel(status:AdmissionStatus):string {
 export function documentTypeLabel(type:AdmissionDocumentType):string {
  return DOCUMENT_TYPES.find(x=>x.value===type)?.label??'Other';
 }
+
+export interface ApplicantAcademicProgram { id:string; name:string; code:string; degreeLevel:number; durationInYears:number; }
