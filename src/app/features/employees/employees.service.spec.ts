@@ -1,0 +1,17 @@
+import { TestBed } from '@angular/core/testing';
+import { provideHttpClient } from '@angular/common/http';
+import { HttpTestingController,provideHttpClientTesting } from '@angular/common/http/testing';
+import { afterEach,beforeEach,describe,expect,it } from 'vitest';
+import { environment } from '../../../environments/environment';
+import { EmployeesService } from './employees.service';
+import { EmployeeCategory,EmployeeStatus,employeeCategoryLabel,employeeStatusLabel } from './employees.models';
+describe('EmployeesService',()=>{
+ let api:EmployeesService;let http:HttpTestingController;const base=environment.apiBaseUrl+'/api/v1/employees';
+ beforeEach(()=>{TestBed.configureTestingModule({providers:[provideHttpClient(),provideHttpClientTesting()]});api=TestBed.inject(EmployeesService);http=TestBed.inject(HttpTestingController);});
+ afterEach(()=>http.verify());
+ it('sends paging and supported employee filters',()=>{api.getPage({page:2,pageSize:25,departmentId:'dept-1',status:EmployeeStatus.Active,category:EmployeeCategory.Academic}).subscribe();const r=http.expectOne(q=>q.url===base+'/'&&q.params.get('page')==='2'&&q.params.get('pageSize')==='25'&&q.params.get('departmentId')==='dept-1'&&q.params.get('status')==='1'&&q.params.get('category')==='1');expect(r.request.method).toBe('GET');r.flush({items:[],page:2,pageSize:25,totalCount:0,totalPages:0});});
+ it('uses exact create and profile update DTO shapes',()=>{const body={employeeNumber:'EMP-01',fullName:'A Person',email:'a@example.com',designation:'Lecturer',departmentId:'dept-1',category:EmployeeCategory.Academic,joiningDate:'2026-01-01',phoneNumber:null,identityUserId:null};api.create(body).subscribe();const c=http.expectOne(base+'/');expect(c.request.method).toBe('POST');expect(c.request.body).toEqual(body);c.flush({id:'emp-1'});const update={fullName:'A Person',email:'a@example.com',designation:'Senior Lecturer',phoneNumber:null};api.updateProfile('emp-1',update).subscribe();const u=http.expectOne(base+'/emp-1/profile');expect(u.request.method).toBe('PUT');expect(u.request.body).toEqual(update);u.flush(null);});
+ it('calls department transfer and status change contracts',()=>{api.transfer('emp-1','dept-2').subscribe();const t=http.expectOne(base+'/emp-1/department');expect(t.request.method).toBe('PUT');expect(t.request.body).toEqual({departmentId:'dept-2'});t.flush(null);api.changeStatus('emp-1',EmployeeStatus.OnLeave,'2026-11-14').subscribe();const s=http.expectOne(base+'/emp-1/status');expect(s.request.method).toBe('PUT');expect(s.request.body).toEqual({status:2,effectiveDate:'2026-11-14'});s.flush(null);});
+ it('creates and updates teacher profile with the same backend contract',()=>{const body={highestQualification:'PhD',specialization:'Agronomy',academicRank:'Associate Professor'};api.createTeacherProfile('emp-1',body).subscribe();const c=http.expectOne(base+'/emp-1/teacher-profile');expect(c.request.method).toBe('POST');expect(c.request.body).toEqual(body);c.flush({id:'tp-1',employeeId:'emp-1',...body});api.updateTeacherProfile('emp-1',body).subscribe();const u=http.expectOne(base+'/emp-1/teacher-profile');expect(u.request.method).toBe('PUT');u.flush({id:'tp-1',employeeId:'emp-1',...body});});
+ it('maps employee enum values',()=>{expect(employeeCategoryLabel(EmployeeCategory.Academic)).toBe('Academic');expect(employeeStatusLabel(EmployeeStatus.Terminated)).toBe('Terminated');});
+});
