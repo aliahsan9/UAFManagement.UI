@@ -15,3 +15,4 @@ import { ConfirmationService } from '../../../core/services/confirmation.service
   }`
 })
 export class ConfirmationDialog { readonly confirmation = inject(ConfirmationService); }
+export { ConfirmationDialog as ConfirmDialogComponent };
