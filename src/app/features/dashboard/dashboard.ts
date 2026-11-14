@@ -1,13 +1,12 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
-import { RouterLink } from '@angular/router';
 import { DashboardService } from './dashboard.service';
 import { DashboardSummary } from './dashboard.models';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [RouterLink, DecimalPipe],
+  imports: [DecimalPipe],
   template: `
     <section class="dashboard-page">
       <header class="dashboard-page__heading">
@@ -59,7 +58,7 @@ import { DashboardSummary } from './dashboard.models';
           @if (loading()) {
             <div class="chart-loading"><span class="stat-skeleton"></span><span class="stat-skeleton"></span><span class="stat-skeleton"></span></div>
           } @else if (summary()?.studentStatuses; as statuses) {
-            <div class="enrollment-total"><strong>{{summary()?.students?.value ?? '—' | number}}</strong><span>total student records</span></div>
+            <div class="enrollment-total"><strong>{{ summary()?.students?.value === null || summary()?.students?.value === undefined ? '—' : (summary()?.students?.value | number) }}</strong><span>total student records</span></div>
             <div class="status-bars">
               @for (item of statuses; track item.label) {
                 <div class="status-bar-row">
@@ -102,9 +101,9 @@ import { DashboardSummary } from './dashboard.models';
             <div><span class="eyebrow">QUICK ACCESS</span><h2>University modules</h2><p>Core areas available through the API</p></div>
           </div>
           <div class="dashboard-quick-links">
-            <a routerLink="/dashboard"><span class="quick-link-icon quick-link-icon--blue">S</span><span><strong>Students</strong><small>Student records API</small></span><b>→</b></a>
-            <a routerLink="/dashboard"><span class="quick-link-icon quick-link-icon--violet">A</span><span><strong>Academic catalog</strong><small>Programs and sessions API</small></span><b>→</b></a>
-            <a routerLink="/dashboard"><span class="quick-link-icon quick-link-icon--green">E</span><span><strong>Employees</strong><small>Employee records API</small></span><b>→</b></a>
+            <div class="quick-link-row"><span class="quick-link-icon quick-link-icon--blue">S</span><span><strong>Students</strong><small>Student records API</small></span><b>Available</b></div>
+            <div class="quick-link-row"><span class="quick-link-icon quick-link-icon--violet">A</span><span><strong>Academic catalog</strong><small>Programs and sessions API</small></span><b>Available</b></div>
+            <div class="quick-link-row"><span class="quick-link-icon quick-link-icon--green">E</span><span><strong>Employees</strong><small>Employee records API</small></span><b>Available</b></div>
           </div>
           <div class="panel-footnote">Dedicated module pages will be introduced in their respective phases.</div>
         </article>
