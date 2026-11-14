@@ -1,0 +1,13 @@
+import { Component, inject, signal } from '@angular/core';
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { finalize } from 'rxjs';
+import { AdmissionsService } from './admissions.service';
+import { NotificationService } from '../../core/services/notification.service';
+
+@Component({selector:'app-registration-series-page',standalone:true,imports:[ReactiveFormsModule],
+ template:`<div class="page-heading"><div><span class="eyebrow">ADMISSIONS CONFIGURATION</span><h1>Registration series</h1><p>Configure the registration number sequence used when accepted applicants become students.</p></div></div><div class="card border-0 shadow-sm p-4" style="max-width:760px"><form [formGroup]="form" (ngSubmit)="save()" class="row g-3"><div class="col-12"><div class="alert alert-info small">A series is scoped to an academic program and admission year. Configure it before converting accepted applicants.</div></div><div class="col-md-6"><label class="form-label">Academic program ID</label><input class="form-control" formControlName="academicProgramId" placeholder="Program GUID"></div><div class="col-md-6"><label class="form-label">Admission year</label><input class="form-control" type="number" formControlName="admissionYear" min="2000" max="9999"></div><div class="col-md-6"><label class="form-label">Prefix</label><input class="form-control" formControlName="prefix" maxlength="20" placeholder="UAF-CS-26"></div><div class="col-md-6"><label class="form-label">Next number</label><input class="form-control" type="number" formControlName="nextNumber" min="1"></div><div class="col-12 d-flex justify-content-end"><button class="btn btn-primary" [disabled]="form.invalid||saving()">{{saving()?'Saving…':'Save registration series'}}</button></div></form></div>`})
+export class RegistrationSeriesPage {
+ private fb=inject(FormBuilder);private service=inject(AdmissionsService);private notices=inject(NotificationService);readonly saving=signal(false);
+ readonly form=this.fb.nonNullable.group({academicProgramId:['',[Validators.required]],admissionYear:[new Date().getFullYear(),[Validators.required,Validators.min(2000),Validators.max(9999)]],prefix:['UAF',[Validators.required,Validators.maxLength(20)]],nextNumber:[1,[Validators.required,Validators.min(1)]]});
+ save():void{if(this.form.invalid)return;this.saving.set(true);this.service.configureRegistrationSeries(this.form.getRawValue()).pipe(finalize(()=>this.saving.set(false))).subscribe({next:()=>this.notices.show('Registration series configured.','success'),error:e=>this.notices.show(e.error?.detail??'Unable to configure registration series.','error')});}
+}

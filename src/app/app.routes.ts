@@ -1,13 +1,24 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
 import { roleGuard } from './core/guards/role.guard';
-const academicPermissions = ['academic-structure.manage'];
-const catalogPermissions = ['academic-catalog.manage'];
-export const routes: Routes = [
- {path:'auth',loadComponent:()=>import('./features/auth/auth-layout/auth-layout').then(m=>m.AuthLayout),children:[
-  {path:'login',loadComponent:()=>import('./features/auth/login/login').then(m=>m.Login)},
-  {path:'register',loadComponent:()=>import('./features/auth/register/register').then(m=>m.Register)},
-  {path:'',pathMatch:'full',redirectTo:'login'}]},
+const academicPermissions=['academic-structure.manage'];
+const catalogPermissions=['academic-catalog.manage'];
+const admissionsStaffPermissions=['Admissions.Staff'];
+const admissionsDecisionPermissions=['Admissions.Staff','Admissions.Decision'];
+export const routes:Routes=[
+ {path:'auth',loadComponent:()=>import('./features/auth/auth-layout/auth-layout').then(m=>m.AuthLayout),children:[{path:'login',loadComponent:()=>import('./features/auth/login/login').then(m=>m.Login)},{path:'register',loadComponent:()=>import('./features/auth/register/register').then(m=>m.Register)},{path:'',pathMatch:'full',redirectTo:'login'}]},
+ {path:'applicant/login',loadComponent:()=>import('./features/admissions/applicant-auth-page').then(m=>m.ApplicantAuthPage),data:{mode:'login'}},
+ {path:'applicant/register',loadComponent:()=>import('./features/admissions/applicant-auth-page').then(m=>m.ApplicantAuthPage),data:{mode:'register'}},
+ {path:'applicant',canActivate:[authGuard],loadComponent:()=>import('./layouts/applicant-layout/applicant-layout').then(m=>m.ApplicantLayout),children:[
+  {path:'dashboard',loadComponent:()=>import('./features/admissions/applicant-dashboard').then(m=>m.ApplicantDashboard)},
+  {path:'applications',loadComponent:()=>import('./features/admissions/applicant-applications-page').then(m=>m.ApplicantApplicationsPage)},
+  {path:'applications/new',loadComponent:()=>import('./features/admissions/applicant-application-form').then(m=>m.ApplicantApplicationForm)},
+  {path:'applications/:id/edit',loadComponent:()=>import('./features/admissions/applicant-application-form').then(m=>m.ApplicantApplicationForm)},
+  {path:'applications/:id/documents',loadComponent:()=>import('./features/admissions/applicant-application-details').then(m=>m.ApplicantApplicationDetails)},
+  {path:'applications/:id/timeline',loadComponent:()=>import('./features/admissions/applicant-application-details').then(m=>m.ApplicantApplicationDetails)},
+  {path:'applications/:id/readiness',loadComponent:()=>import('./features/admissions/applicant-application-details').then(m=>m.ApplicantApplicationDetails)},
+  {path:'applications/:id',loadComponent:()=>import('./features/admissions/applicant-application-details').then(m=>m.ApplicantApplicationDetails)},
+  {path:'',pathMatch:'full',redirectTo:'dashboard'}]},
  {path:'',canActivate:[authGuard],canActivateChild:[roleGuard],loadComponent:()=>import('./layouts/admin-layout/admin-layout').then(m=>m.AdminLayout),children:[
   {path:'dashboard',loadComponent:()=>import('./features/dashboard/dashboard').then(m=>m.Dashboard)},
   {path:'academic-structure/universities',loadComponent:()=>import('./features/academic-structure/academic-structure-page').then(m=>m.AcademicStructurePage),data:{entity:'universities',permissions:academicPermissions}},
@@ -17,6 +28,11 @@ export const routes: Routes = [
   {path:'academic-structure/programs',loadComponent:()=>import('./features/academic-structure/academic-structure-page').then(m=>m.AcademicStructurePage),data:{entity:'programs',permissions:academicPermissions}},
   {path:'academic-sessions',loadComponent:()=>import('./features/academic-catalog/academic-sessions-page').then(m=>m.AcademicSessionsPage),data:{permissions:catalogPermissions}},
   {path:'courses',loadComponent:()=>import('./features/academic-catalog/courses-page').then(m=>m.CoursesPage),data:{permissions:catalogPermissions}},
+  {path:'admissions/staff',loadComponent:()=>import('./features/admissions/admissions-staff-dashboard').then(m=>m.AdmissionsStaffDashboard),data:{permissions:admissionsStaffPermissions}},
+  {path:'admissions/staff/applications',loadComponent:()=>import('./features/admissions/admissions-staff-queue').then(m=>m.AdmissionsStaffQueue),data:{permissions:admissionsStaffPermissions}},
+  {path:'admissions/staff/applications/new',loadComponent:()=>import('./features/admissions/admissions-staff-draft').then(m=>m.AdmissionsStaffDraft),data:{permissions:admissionsStaffPermissions}},
+  {path:'admissions/staff/applications/:id',loadComponent:()=>import('./features/admissions/admissions-staff-detail').then(m=>m.AdmissionsStaffDetail),data:{permissions:admissionsStaffPermissions}},
+  {path:'admissions/staff/registration-series',loadComponent:()=>import('./features/admissions/registration-series-page').then(m=>m.RegistrationSeriesPage),data:{permissions:admissionsDecisionPermissions}},
   {path:'',pathMatch:'full',redirectTo:'dashboard'}]},
  {path:'forbidden',loadComponent:()=>import('./features/errors/error-page').then(m=>m.ErrorPage),data:{code:'403',title:'Access restricted',message:'You do not have permission to view this page.'}},
  {path:'not-found',loadComponent:()=>import('./features/errors/error-page').then(m=>m.ErrorPage)},
