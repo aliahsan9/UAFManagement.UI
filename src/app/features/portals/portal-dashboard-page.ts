@@ -11,20 +11,19 @@ const PORTALS:Record<string,{eyebrow:string;title:string;description:string;link
   {title:'Course offerings',description:'Course delivery and student enrollment.',path:'/course-offerings',policy:'CourseOfferings.Management',icon:'CO'},
   {title:'Admissions operations',description:'Review applications and admissions workflow.',path:'/admissions/staff',policy:'Admissions.Staff',icon:'AD'},
   {title:'Employees',description:'University employee records and administration.',path:'/employees',policy:'Employees.Management',icon:'EM'},
-  {title:'Finance and fees',description:'Fee heads, fee structures, challans and payments.',path:'/finance',policy:'Finance.Management',icon:'FI'},
-  {title:'Attendance',description:'Attendance sessions, records and reports.',path:'/attendance',policy:'Attendance.Management',icon:'AT'},
-  {title:'Examinations',description:'Examination schedules, marks and results.',path:'/examinations',policy:'Examinations.Management',icon:'EX'},
-  {title:'Grade scales',description:'Configure published grading scales.',path:'/grading/scales',policy:'Grading.ScaleManagement',icon:'GS'},
+  {title:'Finance and fees',description:'Fee heads, fee structures, challans and payments.',path:'/finance',policies:['Finance.Management','Analytics.Read'],icon:'FI'},
+  {title:'Attendance',description:'Attendance sessions, records and reports.',path:'/attendance',policies:['Attendance.Management','AcademicCatalog.Management','CourseOfferings.Management','Students.Management'],icon:'AT'},
+  {title:'Examinations',description:'Examination schedules, marks and results.',path:'/examinations',policies:['Examinations.Management','CourseOfferings.Management'],icon:'EX'},
+  {title:'Grade scales',description:'Configure published grading scales.',path:'/grading/scales',policies:['Grading.ScaleManagement','AcademicCatalog.Management'],icon:'GS'},
   {title:'Grade appeals',description:'Review student grade appeals.',path:'/grading/appeals',policy:'Grading.GradeAppealReview',icon:'GA'},
   {title:'Grade revisions',description:'Manage and approve grade revision requests.',path:'/grading/revisions',policy:'Grading.GradeRevisionRequestManagement',icon:'GR'},
   {title:'Official transcripts',description:'Issue official academic transcripts.',path:'/transcripts/issue',policy:'Transcripts.Issuance',icon:'TR'},
   {title:'Timetable',description:'Manage teaching rooms and timetable entries.',path:'/timetable',policy:'Timetable.Management',icon:'TT'},
-  {title:'Reporting',description:'Access authorized university analytics.',path:'/finance',policy:'Analytics.Read',icon:'RP'}
  ]},
  admissions:{eyebrow:'ADMISSIONS OPERATIONS',title:'Admissions Portal',description:'Process applicant submissions, verify supporting documents and make admission decisions within your assigned authority.',links:[
   {title:'Application queue',description:'Review submitted applications and their current status.',path:'/admissions/staff/applications',policy:'Admissions.Staff',icon:'AQ'},
   {title:'Create staff application',description:'Start an application on behalf of an applicant.',path:'/admissions/staff/applications/new',policy:'Admissions.Staff',icon:'NA'},
-  {title:'Registration series',description:'Manage admission decision registration sequences.',path:'/admissions/staff/registration-series',policy:'Admissions.Decision',icon:'RS'}
+  {title:'Registration series',description:'Manage admission decision registration sequences.',path:'/admissions/staff/registration-series',policies:['Admissions.Staff','Admissions.Decision'],icon:'RS'}
  ]},
  student:{eyebrow:'STUDENT WORKSPACE',title:'Student Portal',description:'Your academic journey, course results and official academic documents in one place.',links:[
   {title:'Academic record',description:'Semester grades, GPA, appeals and revision history.',path:'/student/academic-record',policy:'AcademicRecords.Student',icon:'AR'},
@@ -49,5 +48,5 @@ const PORTALS:Record<string,{eyebrow:string;title:string;description:string;link
 export class PortalDashboardPage {
  private readonly route=inject(ActivatedRoute);private readonly access=inject(AccessControlService);
  readonly portal=computed(()=>PORTALS[String(this.route.snapshot.data['portal']??'administration')]??PORTALS['administration']);
- readonly links=computed(()=>this.portal().links.filter(link=>this.access.hasPolicy(link.policy)));
+ readonly links=computed(()=>this.portal().links.filter(link=>link.policies?this.access.hasPolicies(link.policies):this.access.hasPolicy(link.policy??'')));
 }
