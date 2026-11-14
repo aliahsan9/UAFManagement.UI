@@ -3,7 +3,7 @@ import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
-import { forkJoin } from 'rxjs';
+import { Observable, forkJoin } from 'rxjs';
 import { AcademicCatalogService } from '../academic-catalog/academic-catalog.service';
 import { AcademicSession, Course, sessionStatusValue, AcademicSessionStatus } from '../academic-catalog/academic-catalog.models';
 import { ConfirmationService } from '../../core/services/confirmation.service';
@@ -97,7 +97,7 @@ export class CourseOfferingsPage implements OnInit {
  openEdit(o:CourseOffering):void{this.editingId.set(o.id);this.form.reset({courseId:o.courseId,academicSessionId:o.academicSessionId,section:o.section,capacity:o.capacity,instructorEmployeeId:o.instructorEmployeeId??''});this.formOpen.set(true);}
  closeForm():void{if(!this.saving())this.formOpen.set(false);}
  save():void{if(this.form.invalid){this.form.markAllAsTouched();return;}this.saving.set(true);const v=this.form.getRawValue();const id=this.editingId();
- const request=id?this.api.updateOffering(id,{capacity:v.capacity,instructorEmployeeId:v.instructorEmployeeId.trim()||null}):this.api.createOffering({courseId:v.courseId,academicSessionId:v.academicSessionId,section:v.section.trim().toUpperCase(),capacity:v.capacity,instructorEmployeeId:v.instructorEmployeeId.trim()||null} satisfies CreateCourseOfferingRequest);
+ const request:Observable<unknown>=id?this.api.updateOffering(id,{capacity:v.capacity,instructorEmployeeId:v.instructorEmployeeId.trim()||null}):this.api.createOffering({courseId:v.courseId,academicSessionId:v.academicSessionId,section:v.section.trim().toUpperCase(),capacity:v.capacity,instructorEmployeeId:v.instructorEmployeeId.trim()||null} satisfies CreateCourseOfferingRequest);
  request.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({next:()=>{this.saving.set(false);this.formOpen.set(false);this.notices.show(id?'Course offering updated.':'Course offering created.','success');this.load();},error:e=>{this.saving.set(false);this.notices.show(this.apiError(e,'Course offering could not be saved.'),'error');}});
  }
  async transition(o:CourseOffering,action:'publish'|'close'|'cancel'):Promise<void>{const labels={publish:'Publish',close:'Close',cancel:'Cancel'};const messages={publish:'Publishing makes this section available for student enrollment.',close:'Closing stops further enrollment while preserving existing registrations.',cancel:'Cancelling this offering may affect enrolled students.'};const ok=await this.confirmation.confirm(messages[action],{title:labels[action]+' course offering?',confirmText:labels[action],danger:action==='cancel'});if(!ok)return;const call=action==='publish'?this.api.publish(o.id):action==='close'?this.api.close(o.id):this.api.cancel(o.id);call.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({next:()=>{this.notices.show('Course offering '+(action==='publish'?'published':action==='close'?'closed':'cancelled')+'.','success');this.load();},error:e=>this.notices.show(this.apiError(e,'The offering status could not be changed.'),'error')});}
