@@ -17,6 +17,7 @@ const courseGradePermissions=['course-grades.manage','course-offerings.manage'];
 const gradeAppealPermissions=['grade-appeals.review'];
 const gradeRevisionRequestPermissions=['grade-revisions.manage'];
 const gradeRevisionApprovalPermissions=['grade-revisions.manage','grade-revisions.approve'];
+const financePermissions=['finance.manage','analytics.read'];
 export const routes:Routes=[
  {path:'auth',loadComponent:()=>import('./features/auth/auth-layout/auth-layout').then(m=>m.AuthLayout),children:[{path:'login',loadComponent:()=>import('./features/auth/login/login').then(m=>m.Login)},{path:'register',loadComponent:()=>import('./features/auth/register/register').then(m=>m.Register)},{path:'',pathMatch:'full',redirectTo:'login'}]},
  {path:'applicant/login',loadComponent:()=>import('./features/admissions/applicant-auth-page').then(m=>m.ApplicantAuthPage),data:{mode:'login'}},
@@ -47,6 +48,7 @@ export const routes:Routes=[
   {path:'students/:id/edit',loadComponent:()=>import('./features/students/student-form-page').then(m=>m.StudentFormPage),data:{permissions:studentPermissions}},
   {path:'students/:id',loadComponent:()=>import('./features/students/student-details-page').then(m=>m.StudentDetailsPage),data:{permissions:studentPermissions}},
   {path:'attendance',loadComponent:()=>import('./features/attendance/attendance-page').then(m=>m.AttendancePage),data:{permissions:attendancePermissions}},
+  {path:'finance',loadComponent:()=>import('./features/finance/finance-page').then(m=>m.FinancePage),data:{permissions:financePermissions}},
   {path:'grading/scales',loadComponent:()=>import('./features/grading/grading-management-page').then(m=>m.GradingManagementPage),data:{mode:'scales',permissions:gradingScalePermissions}},
   {path:'grading/finalization',loadComponent:()=>import('./features/grading/grading-management-page').then(m=>m.GradingManagementPage),data:{mode:'finalization',permissions:courseGradePermissions}},
   {path:'grading/appeals',loadComponent:()=>import('./features/grading/grading-management-page').then(m=>m.GradingManagementPage),data:{mode:'appeals',permissions:gradeAppealPermissions}},
