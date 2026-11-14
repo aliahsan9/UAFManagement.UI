@@ -1,0 +1,14 @@
+import { Component, inject, signal } from '@angular/core';
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Router, RouterLink } from '@angular/router';
+import { finalize } from 'rxjs';
+import { AdmissionsService } from './admissions.service';
+import { NotificationService } from '../../core/services/notification.service';
+
+@Component({selector:'app-admissions-staff-draft',standalone:true,imports:[ReactiveFormsModule,RouterLink],
+ template:`<div class="page-heading"><div><span class="eyebrow">ADMISSIONS OFFICE</span><h1>Create admission draft</h1><p>Create an application record on behalf of an applicant.</p></div><a routerLink="/admissions/staff/applications" class="btn btn--quiet">Back to queue</a></div><div class="card border-0 shadow-sm p-4" style="max-width:850px"><form [formGroup]="form" (ngSubmit)="save()" class="row g-3"><div class="col-md-6"><label class="form-label">Application number</label><input class="form-control" formControlName="applicationNumber"></div><div class="col-md-6"><label class="form-label">Application date</label><input class="form-control" type="date" formControlName="applicationDate"></div><div class="col-md-6"><label class="form-label">Applicant full name</label><input class="form-control" formControlName="applicantFullName"></div><div class="col-md-6"><label class="form-label">Applicant email</label><input class="form-control" type="email" formControlName="applicantEmail"></div><div class="col-md-6"><label class="form-label">Phone number</label><input class="form-control" formControlName="phoneNumber"></div><div class="col-md-6"><label class="form-label">Academic program ID</label><input class="form-control" formControlName="academicProgramId"></div><div class="col-12 d-flex justify-content-end"><button class="btn btn-primary" [disabled]="form.invalid||saving()">{{saving()?'Creating…':'Create draft'}}</button></div></form></div>`})
+export class AdmissionsStaffDraft {
+ private fb=inject(FormBuilder);private service=inject(AdmissionsService);private router=inject(Router);private notices=inject(NotificationService);readonly saving=signal(false);
+ readonly form=this.fb.nonNullable.group({applicationNumber:['',[Validators.required,Validators.maxLength(50)]],applicantFullName:['',[Validators.required,Validators.maxLength(180)]],applicantEmail:['',[Validators.required,Validators.email]],academicProgramId:['',[Validators.required]],applicationDate:[new Date().toISOString().slice(0,10),[Validators.required]],phoneNumber:['']});
+ save():void{if(this.form.invalid)return;this.saving.set(true);this.service.createStaffDraft(this.form.getRawValue()).pipe(finalize(()=>this.saving.set(false))).subscribe({next:x=>{this.notices.show('Admission draft created.','success');void this.router.navigate(['/admissions/staff/applications',x.applicationId]);},error:e=>this.notices.show(e.error?.detail??'Unable to create admission draft.','error')});}
+}
