@@ -16,6 +16,7 @@ const PORTALS:Record<string,{eyebrow:string;title:string;description:string;link
   {title:'Examinations',description:'Examination schedules, marks and results.',path:'/examinations',policies:['Examinations.Management','CourseOfferings.Management'],icon:'EX'},
   {title:'Examination approvals',description:'Approve submitted marks and publish approved examination results.',path:'/examinations/approvals',policies:['Examinations.Management','Examinations.Approval','CourseOfferings.Management'],icon:'EA'},
   {title:'Grade scales',description:'Configure published grading scales.',path:'/grading/scales',policies:['Grading.ScaleManagement','AcademicCatalog.Management'],icon:'GS'},
+  {title:'Grade finalization',description:'Finalize course grades after published examination assessments.',path:'/grading/finalization',policies:['Grading.CourseGradeManagement','CourseOfferings.Management'],icon:'GF'},
   {title:'Grade appeals',description:'Review student grade appeals.',path:'/grading/appeals',policy:'Grading.GradeAppealReview',icon:'GA'},
   {title:'Grade revision requests',description:'Manage pending student grade revision requests.',path:'/grading/revisions',policy:'Grading.GradeRevisionRequestManagement',icon:'GR'},
   {title:'Grade revision approvals',description:'Approve or reject revision requests under the separate approval policy.',path:'/grading/revisions/approvals',policies:['Grading.GradeRevisionRequestManagement','Grading.GradeRevisionApproval'],icon:'GA'},
