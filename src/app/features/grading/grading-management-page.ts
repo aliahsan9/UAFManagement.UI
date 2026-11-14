@@ -14,7 +14,7 @@ import { Student } from '../students/students.models';
 import { ConfirmationService } from '../../core/services/confirmation.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { GradingService } from './grading.service';
-import { AcademicRecordCourse,CourseGrade,GradeAppeal,GradeAppealAudit,GradeBandInput,GradeRevisionDecision,GradeRevisionRequest,GradeScale,REPEAT_COURSE_POLICIES,RepeatCoursePolicy,appealStatusLabel,repeatCoursePolicyLabel,revisionStatusLabel } from './grading.models';
+import { AcademicRecordCourse,CourseGrade,GradeAppeal,GradeAppealAudit,GradeAppealStatus,GradeBandInput,GradeRevisionDecision,GradeRevisionRequest,GradeScale,REPEAT_COURSE_POLICIES,RepeatCoursePolicy,appealStatusLabel,appealStatusValue,repeatCoursePolicyLabel,revisionStatusLabel } from './grading.models';
 
 @Component({selector:'app-grading-management-page',standalone:true,imports:[ReactiveFormsModule,DatePipe,DecimalPipe],template:`
 <section class="container-fluid px-0">
