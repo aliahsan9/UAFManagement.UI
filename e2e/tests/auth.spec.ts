@@ -1,0 +1,3 @@
+import { expect, test } from '@playwright/test';
+test('login screen renders accessible credential fields', async ({ page }) => { await page.goto('/auth/login'); await expect(page.getByRole('heading', { name: /sign in to your account/i })).toBeVisible(); await expect(page.getByLabel(/university email/i)).toBeVisible(); await expect(page.getByLabel('Password')).toBeVisible(); await expect(page.getByRole('button', { name: /sign in/i })).toBeDisabled(); });
+test('login form rejects malformed email before submission', async ({ page }) => { await page.goto('/auth/login'); await page.getByLabel(/university email/i).fill('not-an-email'); await page.getByLabel('Password').fill('some-password'); await expect(page.getByRole('button', { name: /sign in/i })).toBeDisabled(); });
