@@ -1,8 +1,10 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule, CurrencyPipe, DatePipe, DecimalPipe } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { EMPTY, catchError, from, map, mergeMap, of, switchMap, toArray } from 'rxjs';
-import { AcademicProgram, AcademicStructureService } from '../academic-structure/academic-structure.service';
+import { AcademicStructureService } from '../academic-structure/academic-structure.service';
+import { AcademicProgram } from '../academic-structure/academic-structure.models';
 import { ConfirmationService } from '../../core/services/confirmation.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { Student, StudentAttendanceRow, CourseAttendanceReport, ExaminationResult, ExaminationListItem, StudentFeeAccount, StudentStatus, studentStatusLabel } from './students.models';
@@ -10,7 +12,7 @@ import { StudentsService } from './students.service';
 import { StudentStatusBadge } from './student-status-badge';
 
 type StudentTab='personal'|'registration'|'program'|'records'|'attendance'|'examinations'|'fees';
-@Component({selector:'app-student-details-page',standalone:true,imports:[CommonModule,RouterLink,DatePipe,DecimalPipe,CurrencyPipe,StudentStatusBadge],
+@Component({selector:'app-student-details-page',standalone:true,imports:[CommonModule,RouterLink,FormsModule,DatePipe,DecimalPipe,CurrencyPipe,StudentStatusBadge],
  template:`
  <section class="container-fluid py-3 student-module">
   <div class="mb-3"><a routerLink="/students" class="small text-decoration-none">← Student directory</a></div>
