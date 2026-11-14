@@ -1,0 +1,26 @@
+name: Frontend E2E
+on:
+  pull_request:
+    branches: [main, "feat/**"]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  playwright:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22.22.3"
+          cache: npm
+      - run: npm ci
+      - name: Install Playwright test dependencies
+        run: npm install --no-audit --no-fund
+        working-directory: e2e
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+        working-directory: e2e
+      - name: Run browser tests
+        run: npm test
+        working-directory: e2e
