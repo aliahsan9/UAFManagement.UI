@@ -27,7 +27,7 @@ template:`<div class="admin-shell" [class.sidebar-open]="sidebarOpen()"><aside c
 export class AdminLayout {
  readonly auth=inject(AuthService);private notices=inject(NotificationService);private confirm=inject(ConfirmationService);private router=inject(Router);
  readonly sidebarOpen=signal(false);readonly profileOpen=signal(false);readonly notificationsOpen=signal(false);readonly searchTerm=signal('');readonly pageTitle=signal('Overview');readonly year=new Date().getFullYear();
- readonly modules=[{name:'Academics',icon:'▤'},{name:'Finance',icon:'◈'},{name:'Finance',icon:'◈'}];
+ readonly modules=[{name:'Academics',icon:'▤'},{name:'Finance',icon:'◈'}];
  get initials():string{return(this.auth.currentUser()?.fullName??'UAF').split(' ').slice(0,2).map(x=>x[0]).join('').toUpperCase();}
  constructor(){this.router.events.pipe(filter(e=>e instanceof NavigationEnd)).subscribe(()=>{this.pageTitle.set(this.router.url.includes('dashboard')?'Overview':this.router.url.split('/').filter(Boolean).pop()?.replaceAll('-',' ')??'Workspace');this.profileOpen.set(false);this.notificationsOpen.set(false);this.sidebarOpen.set(false);});}
  async logout():Promise<void>{this.profileOpen.set(false);const ok=await this.confirm.confirm('You will need to sign in again to access the portal.',{title:'Sign out of your account?',confirmText:'Sign out',danger:true});if(!ok)return;this.auth.logout().subscribe(()=>{this.notices.show('You have been signed out.','success');void this.router.navigateByUrl('/auth/login');});}
