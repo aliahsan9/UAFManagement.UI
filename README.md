@@ -518,3 +518,66 @@ Implemented under `src/app/features/transcripts` and integrated with the existin
 | Public verification | `GET /api/v1/transcripts/verify/{verificationCode}` |
 
 No additional read endpoints were necessary for the requested Phase 14 workflows. Transcript history, PDF generation, immutable snapshots, SHA-256 integrity validation and anonymous verification are all supported by the existing backend. Service contract tests cover the student, registrar and public endpoint shapes.
+
+
+## Phase 15 — Role-specific portals and policy-aware navigation
+
+Introduces separate portal shells and role-aware dashboards. The frontend access map mirrors the backend's `PermissionAuthorizationHandler`, `AuthorizationPolicies` and `AuthorizationPolicyExtensions`.
+
+### Portals
+
+- **Administration Portal** — existing admin shell refactored to show only modules authorized for the signed-in role (university structure, students, catalog, offerings, admissions staff, employees, finance, attendance, examinations, grading, transcripts and timetable).
+- **Admissions Staff Portal** — dedicated staff shell for application queues and review. Registration-series access additionally requires the Admissions Decision policy.
+- **Applicant Portal** — existing applicant shell remains separate and is now protected by the backend's `Admissions.Applicant` policy (which the backend defines as authenticated `Student` role).
+- **Student Portal** — dedicated student shell for own academic record, GPA, appeals/revisions and transcripts.
+- **Faculty / Examination Portal** — dedicated Teacher shell with attendance and examination links, each separately guarded by its backend policy.
+
+The shared portal dashboard component renders different titles, descriptions and available module cards per portal type. It does not fabricate operational metrics where no aggregate endpoint exists.
+
+### Backend policy mapping used by the frontend
+
+| Backend policy | UI access |
+|---|---|
+| `AcademicStructure.Admin` | University structure |
+| `Students.Management` | Student management |
+| `AcademicCatalog.Management` | Sessions and courses |
+| `Admissions.Staff` | Admissions staff portal and queue |
+| `Admissions.Decision` | Registration series / decision workflow, in addition to Admissions.Staff |
+| `Admissions.Applicant` | Applicant self-service (backend Student role) |
+| `Employees.Management` | Employee management |
+| `CourseOfferings.Management` | Offerings and enrollment |
+| `Attendance.Management` | Attendance |
+| `Attendance.PolicyManagement` | Attendance policy configuration route |
+| `Examinations.Management` | Examination and marks workflows |
+| `Examinations.Approval` | Examination approvals, together with examination management |
+| `Grading.ScaleManagement` | Grade scales |
+| `Grading.CourseGradeManagement` | Course grade finalization |
+| `AcademicRecords.Student` | Student's own academic record and transcript list |
+| `Grading.GradeAppealReview` | Staff grade appeal review |
+| `Grading.GradeRevisionRequestManagement` | Grade revision request management |
+| `Grading.GradeRevisionApproval` | Grade revision approval (separate policy) |
+| `Transcripts.Issuance` | Official transcript issuance |
+| `Timetable.Management` | Timetable and rooms |
+| `Finance.Management` | Finance and fees |
+| `Analytics.Read` | Analytics-dependent dashboard access |
+
+### Important authentication contract detail
+
+The backend `GET /api/v1/auth/me` currently returns user ID, full name, email and roles — it does **not** return a permissions array. The access-control helper therefore derives the UI's effective permission hints from the exact role-to-permission map in backend `PermissionAuthorizationHandler`, rather than assuming `CurrentUser.permissions` is populated. It supports explicit permission values if a future backend response includes them.
+
+The helper is used only to improve navigation and route UX. It is not a security boundary. Every protected API endpoint continues to enforce its own backend authorization policy; direct API calls remain protected even if a user manipulates frontend state.
+
+### Route/security changes
+
+- Route metadata now uses backend policy names (`policies`) rather than inconsistent raw permission strings and policy-name aliases.
+- Role and policy checks run in route guards, with AND semantics for multiple policies.
+- Applicant, student, faculty, admissions staff and administration layouts are separate.
+- Student academic record/transcript routes moved into the Student Portal; legacy bookmarks redirect to the new paths.
+- Public transcript verification remains outside authenticated portal layouts.
+- Grade revision request-management and approval routes now check their distinct backend policies.
+- Examination approvals require both Examination Management and Examination Approval.
+- Admission decisions require both Admissions Staff and Admissions Decision.
+
+### Tests
+
+Added pure authorization-map tests for Student, Teacher, DepartmentAdmin, Registrar, FinanceOfficer, HRManager and SuperAdmin, including the distinct revision request/approval policies and multi-policy route semantics.
