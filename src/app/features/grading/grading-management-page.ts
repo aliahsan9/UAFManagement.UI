@@ -14,7 +14,7 @@ import { Student } from '../students/students.models';
 import { ConfirmationService } from '../../core/services/confirmation.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { GradingService } from './grading.service';
-import { AcademicRecordCourse,CourseGrade,GradeAppeal,GradeAppealAudit,GradeBandInput,GradeRevision,GradeRevisionRequest,GradeScale,REPEAT_COURSE_POLICIES,RepeatCoursePolicy,appealStatusLabel,appealStatusValue,revisionStatusLabel,revisionStatusValue,GradeAppealStatus,GradeRevisionStatus } from './grading.models';
+import { AcademicRecordCourse,CourseGrade,GradeAppeal,GradeAppealAudit,GradeBandInput,GradeRevision,GradeRevisionDecision,GradeRevisionRequest,GradeScale,REPEAT_COURSE_POLICIES,RepeatCoursePolicy,appealStatusLabel,appealStatusValue,revisionStatusLabel,revisionStatusValue,GradeAppealStatus,GradeRevisionStatus } from './grading.models';
 
 @Component({selector:'app-grading-management-page',standalone:true,imports:[ReactiveFormsModule,DatePipe,DecimalPipe],template:`
 <section class="container-fluid px-0">
@@ -68,7 +68,7 @@ export class GradingManagementPage implements OnInit {
  readonly sessions=signal<AcademicSession[]>([]);readonly sessionId=signal('');readonly scale=signal<GradeScale|null>(null);readonly bands=signal<GradeBandInput[]>([{letterGrade:'A',minimumPercentage:85,gradePoints:4,isPassing:true},{letterGrade:'B',minimumPercentage:70,gradePoints:3,isPassing:true},{letterGrade:'C',minimumPercentage:60,gradePoints:2,isPassing:true},{letterGrade:'D',minimumPercentage:50,gradePoints:1,isPassing:true},{letterGrade:'F',minimumPercentage:0,gradePoints:0,isPassing:false}]);
  readonly offerings=signal<CourseOffering[]>([]);readonly offeringId=signal('');readonly studentsForOffering=signal<CourseEnrollment[]>([]);readonly studentLabels=signal<Record<string,Student>>({});readonly finalizedGrades=signal<CourseGrade[]>([]);readonly finalizingId=signal('');
  readonly appeals=signal<GradeAppeal[]>([]);readonly selectedAppeal=signal<GradeAppeal|null>(null);readonly appealHistory=signal<GradeAppealAudit[]>([]);readonly appealRemarks=signal('');readonly approvedAppeal=signal<GradeAppeal|null>(null);
- readonly revisionRequests=signal<GradeRevisionRequest[]>([]);readonly revisionDecisionRemarks=signal('');readonly revisionDecision=signal<{requestId:string;status:GradeRevisionStatus;revision:GradeRevision|null}|null>(null);
+ readonly revisionRequests=signal<GradeRevisionRequest[]>([]);readonly revisionDecisionRemarks=signal('');readonly revisionDecision=signal<GradeRevisionDecision|null>(null);
  readonly loading=signal(false);readonly creatingScale=signal(false);readonly pageError=signal('');readonly scaleValidation=signal('');readonly decisionSaving=signal(false);readonly revisionRequestSaving=signal(false);
  readonly scaleForm=this.fb.group({name:['UAF grading scale',[Validators.required,Validators.maxLength(120)]],includeFailedCoursesInGpa:[false],repeatCoursePolicy:[RepeatCoursePolicy.LatestAttempt,Validators.required]});
  readonly revisionRequestForm=this.fb.group({gradeId:[''],appealId:[''],proposedMarksObtained:[0,[Validators.required,Validators.min(0),Validators.max(100)]],reason:['',[Validators.required,Validators.maxLength(1000)]]});
