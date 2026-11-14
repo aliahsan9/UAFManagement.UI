@@ -25,3 +25,6 @@ export function appealStatusValue(v:GradeAppealStatus|number|string):GradeAppeal
 export function appealStatusLabel(v:GradeAppealStatus|number|string):string{return ({1:'Pending',2:'Approved',3:'Rejected'} as Record<number,string>)[appealStatusValue(v)]??'Unknown';}
 export function revisionStatusValue(v:GradeRevisionStatus|number|string):GradeRevisionStatus{if(typeof v==='number')return v as GradeRevisionStatus;const k=String(v).toLowerCase();return (({pendingapproval:1,approved:2,rejected:3} as Record<string,number>)[k]??Number(k)||0) as GradeRevisionStatus;}
 export function revisionStatusLabel(v:GradeRevisionStatus|number|string):string{return ({1:'Pending approval',2:'Approved',3:'Rejected'} as Record<number,string>)[revisionStatusValue(v)]??'Unknown';}
+
+export function repeatCoursePolicyValue(v:RepeatCoursePolicy|number|string):RepeatCoursePolicy{if(typeof v==='number')return v as RepeatCoursePolicy;const k=String(v).toLowerCase();return (({allattempts:1,latestattempt:2,highestgrade:3} as Record<string,number>)[k]??(Number(k)||0)) as RepeatCoursePolicy;}
+export function repeatCoursePolicyLabel(v:RepeatCoursePolicy|number|string):string{return REPEAT_COURSE_POLICIES.find(x=>x.value===repeatCoursePolicyValue(v))?.label??'Unknown';}
