@@ -3,7 +3,8 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { finalize } from 'rxjs';
-import { AcademicProgram, AcademicStructureService } from '../academic-structure/academic-structure.service';
+import { AcademicStructureService } from '../academic-structure/academic-structure.service';
+import { AcademicProgram } from '../academic-structure/academic-structure.models';
 import { StudentsService } from './students.service';
 import { NotificationService } from '../../core/services/notification.service';
 
