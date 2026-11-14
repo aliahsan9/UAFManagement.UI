@@ -654,7 +654,7 @@ The feature-scoped services remain the owners of module contracts and DTOs. Shar
 - `X-Correlation-ID` is attached to requests and response IDs are retained for diagnostics. The API CORS policy supports this header and exposes it to the browser.
 - `Idempotency-Key` is opt-in and validated as 1–128 printable ASCII characters. Finance mutations, admission submission/review/decision/conversion commands, attendance session creation/finalization and official transcript issuance use it. A caller can pass a stable key to reuse across a retry; never reuse a key with a different payload.
 - `ServerValidationService` maps backend Problem Details field errors onto Reactive Form controls and returns unmatched messages for a form summary.
-- HTTP 409 advises reloading stale data; HTTP 429 surfaces the server `Retry-After` value; network/server failures include the correlation reference where available.
+- HTTP 409 advises reloading stale data; HTTP 429 shows retry guidance and displays `Retry-After` when exposed by CORS. The current backend exposes `X-Correlation-ID` and `Idempotency-Replayed`; add `Retry-After` to the backend CORS exposed-header list if the browser should read that value. Network/server failures include the correlation reference where available.
 - Existing module services and DTOs remain feature-scoped. Admissions staff list already uses supported page/pageSize/status/program/search query fields. Use DataTable server-side mode only where an endpoint supports its documented paging, sorting and filtering contract.
 - Existing FormData upload and Blob download endpoints are retained. Browser-side file checks are UX only; API validation remains mandatory.
 
