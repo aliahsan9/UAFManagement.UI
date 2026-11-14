@@ -222,3 +222,57 @@ Implemented in `src/app/features/employees` against the actual `EmployeeEndpoint
 - Teacher profile update is supported by the backend, but there is no read endpoint to detect an existing profile or prefill persisted values. The UI therefore cannot automatically determine create versus update for profiles created before this session; a backend teacher-profile GET endpoint is required for full persisted profile editing.
 - Department names use the existing academic-structure departments endpoint. That lookup additionally requires `academic-structure.manage`; if unavailable, the employee remains accessible and the UI falls back to the department identifier.
 - Employee endpoints inherit `Employees.Management`, mapped to `employees.manage`. The route guard is a navigation aid; API authorization remains authoritative.
+
+
+## Phase 9 — Timetable and room management
+
+Implemented in `src/app/features/timetable` against `TimetableEndpoints.cs` and the actual `TimetableModels.cs` records.
+
+### Screens and workflows
+- `/timetable`: scheduling workspace with Timetable Calendar, Teaching Rooms and Entry List views.
+- Teaching room directory supports campus filtering, room details and creation.
+- Calendar supports Daily, Weekly, Course-wise and Room-wise views over the backend's recurring weekly entries.
+- Entry list supports academic-session filtering and room/campus scoping.
+- Create timetable entry sends course offering, room, .NET DayOfWeek value (Sunday=0), local start/end times, and effective date range.
+- Entry details are loaded from the dedicated detail endpoint; cancellation uses DELETE and requires confirmation.
+
+### Backend validation and conflict handling
+The frontend does not attempt to replace backend conflict detection. On save, it submits the request to the API and surfaces ProblemDetails validation messages. HTTP 409 is highlighted as a room/time conflict; other errors (invalid date range, insufficient room capacity, inactive room, closed/cancelled offering/session, missing references, etc.) are shown with the backend's detail and validation errors. No optimistic schedule insertion occurs after a failed response.
+
+### API mapping
+- Rooms: `GET /api/v1/timetable/rooms?campusId=`, `GET /rooms/{id}`, `POST /rooms`.
+- Entries: `GET /entries?academicSessionId=&courseOfferingId=`, `GET /entries/{id}`, `POST /entries`, `DELETE /entries/{id}`.
+- Room creation uses the existing campus lookup. Course offering, academic session and course labels use their existing module APIs.
+
+### Permissions and API gaps
+- Timetable endpoints inherit `Timetable.Management`, mapped to `timetable.manage`; route guard is a navigation aid and backend authorization is authoritative.
+- Campus names require `academic-structure.manage`; session/course lookups require `academic-catalog.manage`; offering lookup requires `course-offerings.manage`. If a supporting lookup is denied, the page reports that limitation and displays the stable IDs rather than inventing names.
+- The backend models timetable entries as recurring weekly slots, not one-off dated meetings. The daily and weekly calendar views therefore evaluate each slot against its effective date range and weekday.
+- Room creation is supported, but no room update/deactivate endpoint is exposed in the timetable route group.
+- The API exposes no room-specific or date-window query for entries; the UI applies room and calendar filtering to the session-scoped/all entries returned by the backend. For large institutions, add server-side room/date filters and a paged timetable query.
+
+
+## Phase 10 — Attendance management
+
+Implemented under `src/app/features/attendance` against the backend `AttendanceEndpoints.cs`, `AttendanceModels.cs`, and `AttendanceReportModels.cs`.
+
+### Workflows
+- Attendance dashboard scoped to the selected course offering and currently loaded session.
+- Create a session for a course offering and date; load an existing session by its returned ID.
+- Bulk attendance table populated from the offering's currently enrolled students.
+- Exact backend enum values: Present=1, Absent=2, Late=3, Excused=4.
+- Per-student optional remarks map to backend `Reason`; saved response `Remarks` are rehydrated on session reload.
+- Save marks with PUT and finalize an open session with explicit confirmation.
+- Course attendance report with per-student counts, attendance percentage, searchable student summaries and below-threshold list.
+- Attendance policy read/configure per academic session (required percentage, late credit, exclude excused from denominator).
+
+### Backend contract / important API limits
+- `POST /sessions`, `GET /sessions/{id}`, `PUT /sessions/{id}/marks`, `POST /sessions/{id}/finalize`.
+- `GET /offerings/{offeringId}/report`.
+- Policy: `GET /policies/{academicSessionId}`, `PUT /policies/{academicSessionId}`.
+- The backend exposes no session collection/list endpoint, so the UI creates sessions and loads an existing session by ID; it does not invent a session-history API.
+- The backend exposes no standalone student attendance report endpoint; student summaries and below-threshold filtering are derived from the authoritative course report response.
+- Report calculation requires a configured attendance policy and only includes finalized sessions.
+- Student display names are resolved through the existing Students API; if its separate permission is absent, stable student IDs remain visible.
+- Attendance management requires `attendance.manage`; policy configuration additionally requires `attendance-policy.manage`. The policy form surfaces authorization failures returned by the server.
+- Server remains authoritative for offering assignment, duplicate session dates, mark eligibility, state transitions and report calculations.
