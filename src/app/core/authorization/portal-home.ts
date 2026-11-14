@@ -1,4 +1,4 @@
-import { AccessIdentity } from './access-control';
+import type { AccessIdentity } from './access-control';
 import { hasPolicy } from './access-control';
 
 export function portalHomeFor(identity:AccessIdentity|null|undefined):string {
