@@ -17,7 +17,8 @@ export class ApplicantApplicationDetails {
  readonly id=this.route.snapshot.paramMap.get('id')!;readonly loading=signal(true);readonly application=signal<AdmissionApplication|null>(null);readonly documents=signal<AdmissionDocument[]>([]);readonly readiness=signal<SubmissionReadiness|null>(null);
  constructor(){this.load();}
  load():void{this.service.getMyApplication(this.id).pipe(finalize(()=>this.loading.set(false))).subscribe({next:app=>{this.application.set(app);this.refreshDocuments();this.refreshReadiness();},error:()=>this.notices.show('Application could not be loaded.','error')});}
- onUploaded():void{this.refreshDocuments();this.refreshReadiness();}\n private refreshDocuments():void{this.service.getMyDocuments(this.id).subscribe({next:x=>this.documents.set(x),error:()=>this.documents.set([])});}
+ onUploaded():void{this.refreshDocuments();this.refreshReadiness();}
+ private refreshDocuments():void{this.service.getMyDocuments(this.id).subscribe({next:x=>this.documents.set(x),error:()=>this.documents.set([])});}
  private refreshReadiness():void{this.service.getReadiness(this.id).subscribe({next:x=>this.readiness.set(x),error:()=>this.readiness.set(null)});}
  statusLabel(s:AdmissionStatus):string{return admissionStatusLabel(s);}docType(t:AdmissionDocumentType):string{return documentTypeLabel(t);}
  upload(event:Event,type:number):void{const file=(event.target as HTMLInputElement).files?.[0];if(!file)return;if(file.size>10*1024*1024){this.notices.show('File size cannot exceed 10 MB.','error');return;}this.service.uploadDocument(this.id,type,file).subscribe({next:()=>{this.notices.show('Document uploaded.','success');this.refreshDocuments();this.refreshReadiness();},error:e=>this.notices.show(e.error?.detail??'Document upload failed.','error')});}
