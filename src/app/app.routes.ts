@@ -11,14 +11,14 @@ const offeringPolicies=['CourseOfferings.Management'];
 const employeePolicies=['Employees.Management'];
 const timetablePolicies=['Timetable.Management'];
 const attendancePolicies=['Attendance.Management'];
-const attendancePolicyPolicies=['Attendance.PolicyManagement'];
+const attendancePolicyPolicies=['Attendance.PolicyManagement','AcademicCatalog.Management','CourseOfferings.Management'];
 const examinationPolicies=['Examinations.Management'];
 const examinationApprovalPolicies=['Examinations.Management','Examinations.Approval'];
 const gradingScalePolicies=['Grading.ScaleManagement','AcademicCatalog.Management'];
 const courseGradePolicies=['Grading.CourseGradeManagement','CourseOfferings.Management'];
 const gradeAppealPolicies=['Grading.GradeAppealReview'];
 const gradeRevisionRequestPolicies=['Grading.GradeRevisionRequestManagement'];
-const gradeRevisionApprovalPolicies=['Grading.GradeRevisionApproval'];
+const gradeRevisionApprovalPolicies=['Grading.GradeRevisionRequestManagement','Grading.GradeRevisionApproval'];
 const financePolicies=['Finance.Management','Analytics.Read'];
 
 export const routes:Routes=[
@@ -51,9 +51,9 @@ export const routes:Routes=[
  // Faculty portal: individual actions remain guarded by their corresponding backend policies.
  {path:'faculty',canActivate:[authGuard,roleGuard],canActivateChild:[roleGuard],data:{roles:['Teacher']},loadComponent:()=>import('./layouts/faculty-portal-layout/faculty-portal-layout').then(m=>m.FacultyPortalLayout),children:[
   {path:'dashboard',loadComponent:()=>import('./features/portals/portal-dashboard-page').then(m=>m.PortalDashboardPage),data:{portal:'faculty'}},
-  {path:'attendance',loadComponent:()=>import('./features/attendance/attendance-page').then(m=>m.AttendancePage),data:{policies:attendancePolicies}},
-  {path:'examinations',loadComponent:()=>import('./features/examinations/examinations-page').then(m=>m.ExaminationsPage),data:{policies:examinationPolicies}},
-  {path:'examinations/:id/results',loadComponent:()=>import('./features/examinations/examination-results-page').then(m=>m.ExaminationResultsPage),data:{policies:examinationPolicies}},
+  {path:'attendance',loadComponent:()=>import('./features/attendance/attendance-page').then(m=>m.AttendancePage),data:{policies:['Attendance.Management','AcademicCatalog.Management','CourseOfferings.Management','Students.Management']}},
+  {path:'examinations',loadComponent:()=>import('./features/examinations/examinations-page').then(m=>m.ExaminationsPage),data:{policies:['Examinations.Management','CourseOfferings.Management']}},
+  {path:'examinations/:id/results',loadComponent:()=>import('./features/examinations/examination-results-page').then(m=>m.ExaminationResultsPage),data:{policies:['Examinations.Management','CourseOfferings.Management']}},
   {path:'',pathMatch:'full',redirectTo:'dashboard'}]},
 
  // Admissions staff workspace: parent requires Admissions.Staff; decision actions require an additional policy.
