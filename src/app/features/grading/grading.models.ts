@@ -21,7 +21,7 @@ export interface CreateGradeRevisionRequest { appealId:string; proposedMarksObta
 export interface DecideGradeRevisionRequest { approve:boolean; remarks:string; }
 
 export const REPEAT_COURSE_POLICIES=[{value:RepeatCoursePolicy.AllAttempts,label:'Count all attempts'},{value:RepeatCoursePolicy.LatestAttempt,label:'Use latest attempt'},{value:RepeatCoursePolicy.HighestGrade,label:'Use highest grade'}] as const;
-export function appealStatusValue(v:GradeAppealStatus|number|string):GradeAppealStatus{if(typeof v==='number')return v as GradeAppealStatus;const k=String(v).toLowerCase();return (({pending:1,approved:2,rejected:3} as Record<string,number>)[k]??Number(k)||0) as GradeAppealStatus;}
+export function appealStatusValue(v:GradeAppealStatus|number|string):GradeAppealStatus{if(typeof v==='number')return v as GradeAppealStatus;const k=String(v).toLowerCase();return (({pending:1,approved:2,rejected:3} as Record<string,number>)[k]??(Number(k)||0)) as GradeAppealStatus;}
 export function appealStatusLabel(v:GradeAppealStatus|number|string):string{return ({1:'Pending',2:'Approved',3:'Rejected'} as Record<number,string>)[appealStatusValue(v)]??'Unknown';}
 export function revisionStatusValue(v:GradeRevisionStatus|number|string):GradeRevisionStatus{if(typeof v==='number')return v as GradeRevisionStatus;const k=String(v).toLowerCase();return (({pendingapproval:1,approved:2,rejected:3} as Record<string,number>)[k]??Number(k)||0) as GradeRevisionStatus;}
 export function revisionStatusLabel(v:GradeRevisionStatus|number|string):string{return ({1:'Pending approval',2:'Approved',3:'Rejected'} as Record<number,string>)[revisionStatusValue(v)]??'Unknown';}
