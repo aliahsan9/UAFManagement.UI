@@ -386,3 +386,81 @@ Implemented in `src/app/features/grading` against the backend `GradingEndpoints.
 - No staff grade-revision history endpoint. Students can view their own requests and approved revisions per course grade.
 - GPA and repeat-course calculations are server-derived. The chart visualizes returned semester GPAs and never recalculates them in the browser.
 - Duplicate grade finalization is rejected by the backend. Because no grade-read endpoint exists for staff, the UI cannot preload previously finalized rows after refresh.
+
+
+## Phase 13 — Finance and fee management
+
+Implemented in `src/app/features/finance` against the backend `FeeEndpoints.cs`, fee application DTOs and the existing analytics dashboard endpoint.
+
+### Finance dashboard — `/finance`
+
+- University-level outstanding balance from `GET /api/v1/analytics/dashboard` (verified payments are deducted by the backend analytics query).
+- University-wide student totals from the same analytics response.
+- Student-account outstanding balance, challan count and pending payment verification cards when a student account is loaded.
+- Finance shortcuts to fee heads, fee structures, challan generation and student accounts.
+
+### Fee heads
+
+- Create fee head with code, name and mandatory flag.
+- Client-side constraints follow domain limits: code 30 chars, name 120 chars, required code with letters/numbers/underscore/hyphen.
+- Newly created IDs are retained in page memory and can be copied or selected when building a fee structure.
+
+### Fee structures
+
+- Dynamic fee structure builder for academic program ID, academic session ID, semester number, name and one or more fee items.
+- Fee item IDs must be unique and amounts must be positive with two decimal places.
+- Create structure as a draft, then explicitly confirm and publish it.
+- Created structure IDs and publication state are retained in page memory.
+
+### Student challans and accounts
+
+- Generate a challan for a student and a published fee structure with issue date, due date and late fee.
+- Date validation prevents a due date before issue date.
+- The challan creation endpoint returns only an ID; after generation the UI reloads the student's account to retrieve the persisted challan number, totals and status.
+- Student fee account view displays outstanding balance, challan summary, payment history and verification state.
+- Record payment against a selected challan with amount, method and reference number.
+- Client checks remaining balance using verified payments currently present in the account snapshot; the backend's serializable transaction and overpayment check remain authoritative.
+
+### Payment verification
+
+- Separate Payment Entry Form and Payment Verification Modal.
+- Approve/reject are explicit, confirmed actions.
+- Rejection requires remarks; verification remarks are retained in the payment record.
+- Backend requires a different authorized officer from the officer who recorded the payment. The current payment response omits `RecordedByUserId`, so the UI explains this rule and the API remains authoritative.
+
+### Actual endpoint mapping
+
+| UI operation | API |
+| --- | --- |
+| Create fee head | `POST /api/v1/finance/fee-heads` |
+| Create fee structure | `POST /api/v1/finance/fee-structures` |
+| Publish fee structure | `POST /api/v1/finance/fee-structures/{id}/publish` |
+| Generate student challan | `POST /api/v1/finance/challans` |
+| Get student fee account | `GET /api/v1/finance/students/{studentId}/account` |
+| Record payment | `POST /api/v1/finance/challans/{id}/payments` |
+| Verify/reject payment | `POST /api/v1/finance/payments/{id}/verification` |
+| Finance dashboard snapshot | `GET /api/v1/analytics/dashboard` |
+
+### Backend limitations and required follow-up GET endpoints
+
+The finance endpoint group currently has no administrative list/read endpoints for fee heads, fee structures, challans or global payments. Therefore:
+
+- Fee head and fee structure collections show only records created in the current page session. Existing IDs can be pasted into the builder when known.
+- Challans and payments are shown from a selected student's account; there is no global challan/payment register.
+- Student, academic program, academic session and fee-head selection currently uses GUID entry because the finance officer role does not have the student/catalog/academic-structure lookup permissions and the finance API does not provide equivalent lookups.
+- The student account DTO provides challan totals/status and payment history, but not individual challan fee-head line items.
+- The challan create response contains only the generated ID, not a printable challan payload.
+- The payment response omits the recording officer ID, so the frontend cannot pre-check the two-person verification rule.
+
+Recommended backend additions (all under `/api/v1/finance`, protected by `Finance.Management`):
+1. `GET /fee-heads` — active fee-head directory, search and pagination.
+2. `GET /fee-heads/{id}` — fee-head detail.
+3. `GET /fee-structures` — filter by program, session, semester and publication state.
+4. `GET /fee-structures/{id}` — structure details including fee-head line items and currency.
+5. `GET /challans` — paginated challan register with student, status, issue/due date filters.
+6. `GET /challans/{id}` — full challan detail including fee-head lines and verified/unverified payment totals.
+7. `GET /payments` — paginated payment register with status, challan and date filters.
+8. `GET /payments/{id}` — payment detail including `RecordedByUserId`, verifier and audit metadata.
+9. Consider a finance-scoped student lookup endpoint so Finance Officers do not need separate student-management permission for challan workflows.
+
+The UI does not invent these missing reads or treat in-memory session-created items as a persistent register.
