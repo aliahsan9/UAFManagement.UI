@@ -6,7 +6,7 @@ import { AccessControlService } from '../../core/authorization/access-control.se
 import { ConfirmationService } from '../../core/services/confirmation.service';
 import { NotificationService } from '../../core/services/notification.service';
 
-interface AdminNavLink {label:string;path:string;policies:string[];icon:string;}
+interface AdminNavLink {label:string;path:string;policies:string[];roles?:string[];icon:string;}
 interface AdminNavSection {label:string;links:AdminNavLink[];}
 const ADMIN_NAV:AdminNavSection[]=[
  {label:'UNIVERSITY STRUCTURE',links:[
@@ -36,7 +36,8 @@ const ADMIN_NAV:AdminNavSection[]=[
   {label:'Revision approvals',path:'/grading/revisions/approvals',policies:['Grading.GradeRevisionRequestManagement','Grading.GradeRevisionApproval'],icon:'✓'}]},
  {label:'FINANCE',links:[{label:'Finance & fee management',path:'/finance',policies:['Finance.Management','Analytics.Read'],icon:'◈'}]},
  {label:'ACADEMIC DOCUMENTS',links:[{label:'Issue official transcript',path:'/transcripts/issue',policies:['Transcripts.Issuance'],icon:'▤'}]},
- {label:'SCHEDULING',links:[{label:'Timetable & rooms',path:'/timetable',policies:['Timetable.Management'],icon:'▦'}]}
+ {label:'SCHEDULING',links:[{label:'Timetable & rooms',path:'/timetable',policies:['Timetable.Management'],icon:'▦'}]},
+ {label:'SYSTEM',links:[{label:'System health',path:'/system/health',policies:[],roles:['SuperAdmin'],icon:'◉'}]}
 ];
 
 @Component({selector:'app-admin-layout',standalone:true,imports:[RouterOutlet,RouterLink,RouterLinkActive],
@@ -52,7 +53,7 @@ template:`<div class="admin-shell" [class.sidebar-open]="sidebarOpen()"><aside c
 export class AdminLayout {
  readonly auth=inject(AuthService);readonly access=inject(AccessControlService);private readonly notices=inject(NotificationService);private readonly confirm=inject(ConfirmationService);private readonly router=inject(Router);
  readonly sidebarOpen=signal(false);readonly pageTitle=signal('Overview');readonly year=new Date().getFullYear();
- readonly navSections=computed(()=>ADMIN_NAV.map(section=>({...section,links:section.links.filter(link=>this.access.hasPolicies(link.policies))})).filter(section=>section.links.length>0));
+ readonly navSections=computed(()=>ADMIN_NAV.map(section=>({...section,links:section.links.filter(link=>link.roles?this.access.hasAnyRole(link.roles):this.access.hasPolicies(link.policies))})).filter(section=>section.links.length>0));
  get initials():string{return(this.auth.currentUser()?.fullName??'UAF').split(' ').slice(0,2).map(x=>x[0]).join('').toUpperCase();}
  constructor(){this.router.events.pipe(filter(e=>e instanceof NavigationEnd)).subscribe(()=>{this.pageTitle.set(this.router.url.split('/').filter(Boolean).pop()?.replaceAll('-',' ')??'Overview');this.sidebarOpen.set(false);});}
  async logout():Promise<void>{const ok=await this.confirm.confirm('You will need to sign in again to access the portal.',{title:'Sign out of your account?',confirmText:'Sign out',danger:true});if(!ok)return;this.auth.logout().subscribe(()=>{this.notices.show('You have been signed out.','success');void this.router.navigateByUrl('/auth/login');});}
