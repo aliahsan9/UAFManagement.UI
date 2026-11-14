@@ -23,11 +23,11 @@ const ADMIN_NAV:AdminNavSection[]=[
  {label:'ADMISSIONS',links:[{label:'Admissions portal',path:'/admissions/staff',policies:['Admissions.Staff'],icon:'▣'}]},
  {label:'EMPLOYEES',links:[{label:'Employee directory',path:'/employees',policies:['Employees.Management'],icon:'♧'}]},
  {label:'ATTENDANCE',links:[
-  {label:'Attendance management',path:'/attendance',policies:['Attendance.Management'],icon:'✓'},
+  {label:'Attendance management',path:'/attendance',policies:['Attendance.Management','AcademicCatalog.Management','CourseOfferings.Management','Students.Management'],icon:'✓'},
  ]},
  {label:'EXAMINATIONS',links:[
-  {label:'Examination management',path:'/examinations',policies:['Examinations.Management'],icon:'▣'},
-  {label:'Examination approvals',path:'/examinations/approvals',policies:['Examinations.Management','Examinations.Approval'],icon:'✓'}]},
+  {label:'Examination management',path:'/examinations',policies:['Examinations.Management','CourseOfferings.Management'],icon:'▣'},
+  {label:'Examination approvals',path:'/examinations/approvals',policies:['Examinations.Management','Examinations.Approval','CourseOfferings.Management'],icon:'✓'}]},
  {label:'GRADING & GPA',links:[
   {label:'Grade scales',path:'/grading/scales',policies:['Grading.ScaleManagement','AcademicCatalog.Management'],icon:'▤'},
   {label:'Grade finalization',path:'/grading/finalization',policies:['Grading.CourseGradeManagement','CourseOfferings.Management'],icon:'✓'},
