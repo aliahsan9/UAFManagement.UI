@@ -5,6 +5,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { TranscriptsService } from './transcripts.service';
 import { TranscriptListItem } from './transcripts.models';
 import { StudentAcademicRecord } from '../grading/grading.models';
+import { FileTransferService } from '../../core/services/file-transfer.service';
 
 @Component({selector:'app-my-transcripts-page',standalone:true,imports:[DatePipe,DecimalPipe],template:`
 <section class="container-fluid px-0">
@@ -24,10 +25,10 @@ import { StudentAcademicRecord } from '../grading/grading.models';
  }
 </section>`})
 export class MyTranscriptsPage implements OnInit {
- private readonly api=inject(TranscriptsService);private readonly destroyRef=inject(DestroyRef);
+ private readonly api=inject(TranscriptsService);private readonly destroyRef=inject(DestroyRef);private readonly fileTransfer=inject(FileTransferService);
  readonly loading=signal(true);readonly error=signal('');readonly record=signal<StudentAcademicRecord|null>(null);readonly transcripts=signal<TranscriptListItem[]>([]);readonly downloadingId=signal('');
  ngOnInit():void{this.load();}
  load():void{this.loading.set(true);this.error.set('');this.api.getMyAcademicRecord().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({next:x=>this.record.set(x),error:e=>this.error.set(this.message(e))});this.api.getMine().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({next:x=>{this.transcripts.set(x);this.loading.set(false);},error:e=>{this.error.set(this.message(e));this.loading.set(false);}});}
- download(t:TranscriptListItem):void{this.downloadingId.set(t.id);this.api.downloadMyPdf(t.id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({next:blob=>{const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='academic-transcript-'+t.id.replaceAll('-','')+'.pdf';a.click();window.setTimeout(()=>URL.revokeObjectURL(url),1000);this.downloadingId.set('');},error:e=>{this.error.set(this.message(e));this.downloadingId.set('');}});}
+ download(t:TranscriptListItem):void{this.downloadingId.set(t.id);this.api.downloadMyPdf(t.id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({next:blob=>{this.fileTransfer.download(blob,'academic-transcript-'+t.id.replaceAll('-','')+'.pdf');this.downloadingId.set('');},error:e=>{this.error.set(this.message(e));this.downloadingId.set('');}});}
  private message(e:unknown):string{return e instanceof HttpErrorResponse?(e.error?.detail??e.error?.message??'Unable to load transcript information. Please try again.'): 'An unexpected error occurred while processing the transcript request.';}
 }

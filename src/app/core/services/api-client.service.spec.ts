@@ -1,0 +1,7 @@
+import { TestBed } from '@angular/core/testing';
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { ApiClient } from './api-client.service';
+import { idempotencyInterceptor } from '../interceptors/idempotency.interceptor';
+describe('ApiClient', () => { let api: ApiClient; let http: HttpTestingController; beforeEach(() => { TestBed.configureTestingModule({ providers: [provideHttpClient(withInterceptors([idempotencyInterceptor])), provideHttpClientTesting()] }); api = TestBed.inject(ApiClient); http = TestBed.inject(HttpTestingController); }); afterEach(() => http.verify()); it('serializes only supplied query parameters', () => { api.get('/api/v1/students', { params: { page: 2, search: 'Ali', status: undefined } }).subscribe(); const req = http.expectOne(r => r.url.endsWith('/api/v1/students')); expect(req.request.params.get('page')).toBe('2'); expect(req.request.params.get('search')).toBe('Ali'); expect(req.request.params.has('status')).toBe(false); req.flush([]); }); it('adds idempotency only when explicitly requested', () => { api.post('/api/v1/finance/challans', { studentId: 'student-1' }, { idempotencyKey: 'test-key-1' }).subscribe(); const req = http.expectOne(r => r.url.endsWith('/api/v1/finance/challans')); expect(req.request.headers.get('Idempotency-Key')).toBe('test-key-1'); req.flush({ id: 'challan-1' }); }); });

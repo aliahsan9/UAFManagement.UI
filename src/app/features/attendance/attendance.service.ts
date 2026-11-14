@@ -1,16 +1,16 @@
-import { HttpClient } from '@angular/common/http';
 import { Injectable,inject } from '@angular/core';
 import { Observable } from 'rxjs';
-import { environment } from '../../../environments/environment';
+import { ApiClient } from '../../core/services/api-client.service';
+import { createIdempotencyKey } from '../../core/http/http-context.tokens';
 import { AttendancePolicy,AttendanceSession,ConfigureAttendancePolicyRequest,CourseAttendanceReport,CreateAttendanceSessionRequest,MarkAttendanceRequest } from './attendance.models';
 @Injectable({providedIn:'root'})
 export class AttendanceService {
- private readonly http=inject(HttpClient);private readonly base=environment.apiBaseUrl+'/api/v1/attendance';
- createSession(request:CreateAttendanceSessionRequest):Observable<{id:string}>{return this.http.post<{id:string}>(this.base+'/sessions',request);}
- getSession(id:string):Observable<AttendanceSession>{return this.http.get<AttendanceSession>(this.base+'/sessions/'+encodeURIComponent(id));}
- markAttendance(id:string,request:MarkAttendanceRequest):Observable<void>{return this.http.put<void>(this.base+'/sessions/'+encodeURIComponent(id)+'/marks',request);}
- finalizeSession(id:string):Observable<void>{return this.http.post<void>(this.base+'/sessions/'+encodeURIComponent(id)+'/finalize',null);}
- getPolicy(academicSessionId:string):Observable<AttendancePolicy>{return this.http.get<AttendancePolicy>(this.base+'/policies/'+encodeURIComponent(academicSessionId));}
- configurePolicy(academicSessionId:string,request:ConfigureAttendancePolicyRequest):Observable<AttendancePolicy>{return this.http.put<AttendancePolicy>(this.base+'/policies/'+encodeURIComponent(academicSessionId),request);}
- getOfferingReport(offeringId:string):Observable<CourseAttendanceReport>{return this.http.get<CourseAttendanceReport>(this.base+'/offerings/'+encodeURIComponent(offeringId)+'/report');}
+ private readonly api=inject(ApiClient);
+ createSession(request:CreateAttendanceSessionRequest,key=createIdempotencyKey()):Observable<{id:string}>{return this.api.post<{id:string}>('/api/v1/attendance/sessions',request,{idempotencyKey:key});}
+ getSession(id:string):Observable<AttendanceSession>{return this.api.get<AttendanceSession>('/api/v1/attendance/sessions/'+encodeURIComponent(id));}
+ markAttendance(id:string,request:MarkAttendanceRequest):Observable<void>{return this.api.put<void>('/api/v1/attendance/sessions/'+encodeURIComponent(id)+'/marks',request);}
+ finalizeSession(id:string,key=createIdempotencyKey()):Observable<void>{return this.api.post<void>('/api/v1/attendance/sessions/'+encodeURIComponent(id)+'/finalize',null,{idempotencyKey:key});}
+ getPolicy(academicSessionId:string):Observable<AttendancePolicy>{return this.api.get<AttendancePolicy>('/api/v1/attendance/policies/'+encodeURIComponent(academicSessionId));}
+ configurePolicy(academicSessionId:string,request:ConfigureAttendancePolicyRequest):Observable<AttendancePolicy>{return this.api.put<AttendancePolicy>('/api/v1/attendance/policies/'+encodeURIComponent(academicSessionId),request);}
+ getOfferingReport(offeringId:string):Observable<CourseAttendanceReport>{return this.api.get<CourseAttendanceReport>('/api/v1/attendance/offerings/'+encodeURIComponent(offeringId)+'/report');}
 }
