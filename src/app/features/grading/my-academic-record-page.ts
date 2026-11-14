@@ -30,7 +30,7 @@ import { AcademicRecordCourse,GradeAppeal,GradeRevision,GradeRevisionRequest,Stu
 export class MyAcademicRecordPage implements OnInit {
  private readonly api=inject(GradingService);private readonly fb=inject(FormBuilder);private readonly destroyRef=inject(DestroyRef);private readonly confirm=inject(ConfirmationService);private readonly notices=inject(NotificationService);
  readonly record=signal<StudentAcademicRecord|null>(null);readonly loading=signal(true);readonly error=signal('');readonly appeals=signal<GradeAppeal[]>([]);readonly selectedGrade=signal<AcademicRecordCourse|null>(null);readonly revisionRequests=signal<GradeRevisionRequest[]>([]);readonly revisions=signal<GradeRevision[]>([]);readonly submittingAppeal=signal(false);
- readonly appealForm=this.fb.group({reason:['',[Validators.required,Validators.pattern(/.*\\S.*/),Validators.maxLength(1000)]]});
+ readonly appealForm=this.fb.group({reason:['',[Validators.required,Validators.pattern(/.*\S.*/),Validators.maxLength(1000)]]});
  readonly chartDots=computed(()=>{const semesters=(this.record()?.semesters??[]).filter(x=>x.gpa!==null);return semesters.map((s,i)=>({label:s.academicSessionName.length>12?s.academicSessionName.slice(0,11)+'…':s.academicSessionName,gpa:s.gpa!,x:54+(semesters.length===1?280:i*540/(semesters.length-1)),y:190-(s.gpa!/10)*165}));});
  readonly chartPoints=computed(()=>this.chartDots().map(p=>p.x+','+p.y).join(' '));
  ngOnInit():void{this.load();}
