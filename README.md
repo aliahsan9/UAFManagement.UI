@@ -78,3 +78,19 @@ The following widgets are deliberately shown as API gaps instead of displaying i
 - **Recent activities:** there is no consolidated activity-feed endpoint.
 
 For production-grade dashboard analytics, add an authorized, purpose-built endpoint such as `GET /api/v1/dashboard/summary` in the backend. It should return role-filtered aggregate metrics, time-series buckets, pending workflow counts, recent audit/activity entries, and generated-at metadata in one efficient read model. Avoid making the frontend fan out to every module as the dashboard grows.
+
+## Phase 3 — University and academic structure
+
+The academic-structure UI is implemented against the backend AcademicStructureEndpoints.cs and its request/response records. It calls only existing /api/v1/academic-structure endpoints; no client-side mock records or guessed routes are used.
+
+| Screen | API operations |
+| --- | --- |
+| Universities | GET/POST /universities, PUT /universities/{id} |
+| Campuses | GET /campuses?universityId=..., POST, PUT /campuses/{id}, DELETE /campuses/{id} |
+| Faculties | GET /faculties?universityId=..., POST, PUT /faculties/{id}, DELETE /faculties/{id} |
+| Departments | GET /departments?facultyId=..., POST, PUT /departments/{id}, DELETE /departments/{id} |
+| Academic programs | GET /programs?departmentId=..., POST, PUT /programs/{id}, DELETE /programs/{id} |
+
+**Actual hierarchy:** University → Campus and University → Faculty → Department → Academic Program. Campus is a sibling branch under University, not a parent of Faculty. Create forms use cascading university/faculty/department selectors. Update DTOs omit parent IDs, so existing parent relationships are preserved during edits. Deactivation is available only where the backend exposes DELETE; universities do not have a deactivation action.
+
+The backend requires its AcademicStructureAdmin authorization policy (DepartmentAdmin or SuperAdmin). The frontend route guard is a navigation aid; backend authorization remains authoritative. Bootstrap 5.3.8 CSS is loaded globally and used for the Phase 3 layout, cards, tables, form controls, badges and modal structure. The modal is controlled by Angular; no Bootstrap JavaScript bundle is required.
