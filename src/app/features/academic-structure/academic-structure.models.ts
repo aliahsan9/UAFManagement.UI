@@ -11,5 +11,6 @@ export interface CampusRequest { universityId: string; name: string; code: strin
 export interface FacultyRequest { universityId: string; name: string; code: string; }
 export interface DepartmentRequest { facultyId: string; name: string; code: string; }
 export interface AcademicProgramRequest { departmentId: string; name: string; code: string; degreeLevel: DegreeLevel; durationInYears: number; }
-export interface TableColumn { key: string; label: string; }
+import type {DataTableColumn} from '../../shared/models/ui.models';
+export type TableColumn = DataTableColumn;
 export const DEGREE_LEVELS = [{label:'Undergraduate',value:1},{label:'Graduate',value:2},{label:'MPhil',value:3},{label:'Doctoral',value:4}] as const;
