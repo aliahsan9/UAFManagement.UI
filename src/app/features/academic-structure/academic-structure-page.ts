@@ -1,13 +1,12 @@
-import { Component, DestroyRef, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-import { Observable } from 'rxjs';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Observable, Subject, takeUntil } from 'rxjs';
 import { ConfirmationService } from '../../core/services/confirmation.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { DataTable } from '../../shared/components/data-table/data-table';
 import { AcademicStructureService } from './academic-structure.service';
-import { AcademicRecord, Faculty, TableColumn, University, DEGREE_LEVELS, AcademicEntityKind, DegreeLevel } from './academic-structure.models';
+import { AcademicRecord, Department, Faculty, TableColumn, University, DEGREE_LEVELS, AcademicEntityKind, DegreeLevel } from './academic-structure.models';
 
 type EntityConfig = { key: AcademicEntityKind; title: string; description: string; columns: TableColumn[] };
 const CONFIGS: Record<AcademicEntityKind, EntityConfig> = {
@@ -43,9 +42,9 @@ const CONFIGS: Record<AcademicEntityKind, EntityConfig> = {
   </div></div></div>}
  </div>`
 })
-export class AcademicStructurePage implements OnInit {
+export class AcademicStructurePage implements OnInit, OnDestroy {
  private readonly api=inject(AcademicStructureService); private readonly fb=inject(FormBuilder); private readonly route=inject(ActivatedRoute);
- private readonly confirm=inject(ConfirmationService); private readonly notices=inject(NotificationService); private readonly destroyRef=inject(DestroyRef);
+ private readonly confirm=inject(ConfirmationService); private readonly notices=inject(NotificationService); private readonly destroy$=new Subject<void>();
  readonly config:EntityConfig=CONFIGS[this.route.snapshot.data['entity'] as AcademicEntityKind] ?? CONFIGS.universities;
  readonly singular=({universities:'university',campuses:'campus',faculties:'faculty',departments:'department',programs:'academic program'} as Record<AcademicEntityKind,string>)[this.config.key];
  readonly records=signal<AcademicRecord[]>([]); readonly universities=signal<University[]>([]); readonly faculties=signal<Faculty[]>([]); readonly departments=signal<Department[]>([]);
@@ -53,6 +52,7 @@ export class AcademicStructurePage implements OnInit {
  readonly selectedUniversityId=signal(''); readonly selectedFacultyId=signal(''); readonly degreeLevels=DEGREE_LEVELS;
  readonly filteredFaculties=signal<Faculty[]>([]); readonly filteredDepartments=signal<Department[]>([]);
  readonly form=this.fb.group({ universityId:[''], facultyId:[''], departmentId:[''], name:['',[Validators.required,Validators.maxLength(160)]], code:['',[Validators.required,Validators.maxLength(30)]], address:[''], degreeLevel:[1], durationInYears:[4,[Validators.required,Validators.min(1),Validators.max(10)]] });
+ ngOnDestroy():void { this.destroy$.next(); this.destroy$.complete(); }
  ngOnInit():void {
     if(this.config.key==='campuses'||this.config.key==='faculties') this.form.controls.universityId.setValidators([Validators.required]);
     if(this.config.key==='departments') this.form.controls.facultyId.setValidators([Validators.required]);
@@ -61,11 +61,11 @@ export class AcademicStructurePage implements OnInit {
   }
  load():void {
   this.loading.set(true);this.loadError.set('');
-  const request=this.config.key==='universities'?this.api.getUniversities():this.config.key==='campuses'?this.api.getCampuses():this.config.key==='faculties'?this.api.getFaculties():this.config.key==='departments'?this.api.getDepartments():this.api.getPrograms();
-  request.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({next:rows=>{this.records.set(rows as AcademicRecord[]);this.loading.set(false);},error:()=>{this.loadError.set('Unable to load records. Check your access to the AcademicStructureAdmin policy and try again.');this.loading.set(false);}});
-  if(this.config.key!=='universities') this.api.getUniversities().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({next:x=>this.universities.set(x),error:()=>this.notices.show('University options could not be loaded.','error')});
-  if(this.config.key==='departments'||this.config.key==='programs') this.api.getFaculties().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({next:x=>this.faculties.set(x),error:()=>this.notices.show('Faculty options could not be loaded.','error')});
-  if(this.config.key==='programs') this.api.getDepartments().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({next:x=>this.departments.set(x),error:()=>this.notices.show('Department options could not be loaded.','error')});
+  const request=(this.config.key==='universities'?this.api.getUniversities():this.config.key==='campuses'?this.api.getCampuses():this.config.key==='faculties'?this.api.getFaculties():this.config.key==='departments'?this.api.getDepartments():this.api.getPrograms()) as Observable<AcademicRecord[]>;
+  request.pipe(takeUntil(this.destroy$)).subscribe({next:rows=>{this.records.set(rows as AcademicRecord[]);this.loading.set(false);},error:()=>{this.loadError.set('Unable to load records. Check your access to the AcademicStructureAdmin policy and try again.');this.loading.set(false);}});
+  if(this.config.key!=='universities') this.api.getUniversities().pipe(takeUntil(this.destroy$)).subscribe({next:x=>this.universities.set(x),error:()=>this.notices.show('University options could not be loaded.','error')});
+  if(this.config.key==='departments'||this.config.key==='programs') this.api.getFaculties().pipe(takeUntil(this.destroy$)).subscribe({next:x=>this.faculties.set(x),error:()=>this.notices.show('Faculty options could not be loaded.','error')});
+  if(this.config.key==='programs') this.api.getDepartments().pipe(takeUntil(this.destroy$)).subscribe({next:x=>this.departments.set(x),error:()=>this.notices.show('Department options could not be loaded.','error')});
  }
  openCreate():void { this.editingId.set(null);this.form.reset({universityId:'',facultyId:'',departmentId:'',name:'',code:'',address:'',degreeLevel:1,durationInYears:4});this.selectedUniversityId.set('');this.selectedFacultyId.set('');this.filteredFaculties.set([]);this.filteredDepartments.set([]);this.formOpen.set(true); }
  openEdit(row:Record<string,unknown>):void {
@@ -95,12 +95,12 @@ export class AcademicStructurePage implements OnInit {
   else if(this.config.key==='faculties') request=this.editingId()?this.api.updateFaculty(this.editingId()!,{name,code}):this.api.createFaculty({universityId:v.universityId!,name,code});
   else if(this.config.key==='departments') request=this.editingId()?this.api.updateDepartment(this.editingId()!,{name,code}):this.api.createDepartment({facultyId:v.facultyId!,name,code});
   else request=this.editingId()?this.api.updateProgram(this.editingId()!,{name,code,degreeLevel:Number(v.degreeLevel) as import('./academic-structure.models').DegreeLevel,durationInYears:Number(v.durationInYears)}):this.api.createProgram({departmentId:v.departmentId!,name,code,degreeLevel:Number(v.degreeLevel) as DegreeLevel,durationInYears:Number(v.durationInYears)});
-  request.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({next:()=>{this.saving.set(false);this.formOpen.set(false);this.notices.show(this.singular+' saved successfully.','success');this.load();},error:()=>this.saving.set(false)});
+  request.pipe(takeUntil(this.destroy$)).subscribe({next:()=>{this.saving.set(false);this.formOpen.set(false);this.notices.show(this.singular+' saved successfully.','success');this.load();},error:()=>this.saving.set(false)});
  }
  async deactivate(row:Record<string,unknown>):Promise<void>{
   const label=String(row['name']??this.singular);const ok=await this.confirm.confirm('This will mark "'+label+'" as inactive. The record will remain in the system.',{title:'Deactivate '+this.singular+'?',confirmText:'Deactivate',danger:true});if(!ok)return;
   const id=String(row['id']);const request=this.config.key==='campuses'?this.api.deactivateCampus(id):this.config.key==='faculties'?this.api.deactivateFaculty(id):this.config.key==='departments'?this.api.deactivateDepartment(id):this.api.deactivateProgram(id);
-  request.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({next:()=>{this.notices.show(this.singular+' deactivated.','success');this.load();},error:()=>{}});
+  request.pipe(takeUntil(this.destroy$)).subscribe({next:()=>{this.notices.show(this.singular+' deactivated.','success');this.load();},error:()=>{}});
  }
  
 }
