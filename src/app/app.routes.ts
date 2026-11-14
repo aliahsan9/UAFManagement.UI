@@ -42,6 +42,7 @@ export const routes:Routes=[
   {path:'students/:id/edit',loadComponent:()=>import('./features/students/student-form-page').then(m=>m.StudentFormPage),data:{permissions:studentPermissions}},
   {path:'students/:id',loadComponent:()=>import('./features/students/student-details-page').then(m=>m.StudentDetailsPage),data:{permissions:studentPermissions}},
   {path:'attendance',loadComponent:()=>import('./features/attendance/attendance-page').then(m=>m.AttendancePage),data:{permissions:attendancePermissions}},
+  {path:'examinations/:id/results',loadComponent:()=>import('./features/examinations/examination-results-page').then(m=>m.ExaminationResultsPage),data:{permissions:examinationPermissions}},
   {path:'examinations/approvals',loadComponent:()=>import('./features/examinations/examinations-page').then(m=>m.ExaminationsPage),data:{mode:'approval',permissions:examinationApprovalPermissions}},
   {path:'examinations',loadComponent:()=>import('./features/examinations/examinations-page').then(m=>m.ExaminationsPage),data:{permissions:examinationPermissions}},
   {path:'timetable',loadComponent:()=>import('./features/timetable/timetable-page').then(m=>m.TimetablePage),data:{permissions:timetablePermissions}},
