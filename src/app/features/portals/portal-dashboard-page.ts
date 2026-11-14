@@ -2,8 +2,8 @@ import { Component, computed, inject } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { AccessControlService } from '../../core/authorization/access-control.service';
 
-interface PortalLink { title:string;description:string;path:string;policy:string;icon:string; }
-const PORTALS:Record<string,{eyebrow:string;title:string;description:string;links:PortalLink[]}> = {
+interface PortalLink { title:string;description:string;path:string;policy?:string;policies?:string[];icon:string; }
+const PORTALS:Record<string,{eyebrow:string;title:string;description:string;links:PortalLink[];emptyMessage?:string}> = {
  administration:{eyebrow:'UNIVERSITY WORKSPACE',title:'Administration Portal',description:'Manage university operations through the modules assigned to your account.',links:[
   {title:'University structure',description:'Universities, campuses, faculties, departments and programs.',path:'/academic-structure/universities',policy:'AcademicStructure.Admin',icon:'US'},
   {title:'Student management',description:'Student directory, academic status and profiles.',path:'/students',policy:'Students.Management',icon:'ST'},
@@ -32,9 +32,9 @@ const PORTALS:Record<string,{eyebrow:string;title:string;description:string;link
   {title:'Admissions applications',description:'View your applicant self-service workspace.',path:'/applicant/dashboard',policy:'Admissions.Applicant',icon:'AD'}
  ]},
  faculty:{eyebrow:'FACULTY WORKSPACE',title:'Faculty / Examination Portal',description:'Access teaching and examination workflows permitted for your faculty account.',links:[
-  {title:'Attendance management',description:'Record attendance and review course attendance.',path:'/faculty/attendance',policy:'Attendance.Management',icon:'AT'},
-  {title:'Examinations and marks',description:'Manage examinations and enter marks for assigned work.',path:'/faculty/examinations',policy:'Examinations.Management',icon:'EX'}
- ]}
+  {title:'Attendance management',description:'Record attendance and review course attendance.',path:'/faculty/attendance',policies:['Attendance.Management','AcademicCatalog.Management','CourseOfferings.Management','Students.Management'],icon:'AT'},
+  {title:'Examinations and marks',description:'Manage examinations and enter marks for assigned work.',path:'/faculty/examinations',policies:['Examinations.Management','CourseOfferings.Management'],icon:'EX'}
+ ],emptyMessage:'The backend grants Teacher attendance and examination management policies, but the shared screens also require course-offering, academic-catalog and student-management lookup policies. Those lookup permissions are not assigned to Teacher, so links are withheld rather than exposing screens that would fail with authorization errors. The backend needs teacher-scoped read endpoints or explicitly approved read policies to enable these workflows.'}
 };
 
 @Component({selector:'app-portal-dashboard-page',standalone:true,imports:[RouterLink],template:`
@@ -42,7 +42,7 @@ const PORTALS:Record<string,{eyebrow:string;title:string;description:string;link
  <header class="mb-4"><div class="small text-uppercase fw-semibold text-primary mb-2">{{portal().eyebrow}}</div><h1 class="h3 fw-bold mb-2">{{portal().title}}</h1><p class="text-secondary mb-0">{{portal().description}}</p></header>
  <div class="row g-3">
   @for(link of links();track link.path){<div class="col-12 col-md-6 col-xl-4"><a class="card h-100 border-0 shadow-sm text-decoration-none portal-module-card" [routerLink]="link.path"><div class="card-body p-4"><div class="d-flex align-items-center justify-content-between mb-3"><span class="rounded-3 bg-primary-subtle text-primary fw-bold px-3 py-2">{{link.icon}}</span><span class="text-primary">Open →</span></div><h2 class="h6 fw-bold text-body">{{link.title}}</h2><p class="small text-secondary mb-0">{{link.description}}</p></div></a></div>}
-  @empty {<div class="col-12"><div class="alert alert-info">No modules are assigned to this account yet. Contact your system administrator if you believe this is incorrect.</div></div>}
+  @empty {<div class="col-12"><div class="alert alert-info">{{portal().emptyMessage??'No modules are assigned to this account yet. Contact your system administrator if you believe this is incorrect.'}}</div></div>}
  </div>
  <div class="small text-secondary mt-4">Available modules are calculated from the role and permission mapping returned by the university's authentication system. API authorization is enforced independently by the backend.</div>
 </section>`})
