@@ -4,6 +4,7 @@ import { Router, RouterLink } from '@angular/router';
 import { finalize } from 'rxjs';
 import { AuthService } from '../../../core/services/auth.service';
 import { NotificationService } from '../../../core/services/notification.service';
+import { portalHomeFor } from '../../../core/authorization/portal-home';
 @Component({
   selector:'app-login', standalone:true, imports:[ReactiveFormsModule,RouterLink],
   template:`<div class="auth-card"><div class="auth-mobile-brand"><span class="brand__mark">U</span><strong>UAF Management</strong></div>
@@ -30,7 +31,7 @@ export class Login {
     this.loading.set(true);this.errorMessage.set('');
     const {email,password}=this.form.getRawValue();
     this.auth.login({email,password}).pipe(finalize(()=>this.loading.set(false))).subscribe({
-      next:()=>{this.notices.show('You are signed in successfully.','success');void this.router.navigateByUrl('/dashboard');},
+      next:user=>{this.notices.show('You are signed in successfully.','success');void this.router.navigateByUrl(portalHomeFor(user));},
       error:e=>this.errorMessage.set(e.status===401?'The email or password you entered is incorrect.':e.error?.detail??'Unable to sign in right now. Please try again.')
     });
   }
