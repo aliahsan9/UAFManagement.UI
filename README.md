@@ -464,3 +464,57 @@ Recommended backend additions (all under `/api/v1/finance`, protected by `Financ
 9. Consider a finance-scoped student lookup endpoint so Finance Officers do not need separate student-management permission for challan workflows.
 
 The UI does not invent these missing reads or treat in-memory session-created items as a persistent register.
+
+
+## Phase 14 — Academic records and official transcripts
+
+Implemented under `src/app/features/transcripts` and integrated with the existing grading academic-record experience.
+
+### Student academic record
+
+- Reuses the authenticated `GET /api/v1/academic-records/me` endpoint and the existing Academic Record page.
+- Existing Semester GPA cards, course-grade table, cumulative GPA and credit-hour breakdown remain the source of truth.
+- Student grade appeal history is loaded from `GET /api/v1/academic-records/me/grade-appeals/`.
+- Per-course revision requests and approved grade revision history are loaded from the existing student-only course-grade history endpoints.
+- Added a direct link from the academic record page to My Transcripts.
+
+### My Transcripts — `/my-transcripts`
+
+- Student-only page.
+- Transcript preview renders the current academic record grouped by academic session, with course code/title, credit hours, marks, percentage, letter grade, grade points and semester GPA.
+- Clearly labels the live preview as unofficial; it is not represented as an issued document.
+- Lists issued transcript metadata returned by the backend.
+- Downloads the immutable issued PDF from `GET /api/v1/academic-records/me/transcripts/{transcriptId}/pdf` as a Blob.
+- Opens the public verification URL for each transcript.
+
+### Registrar issuance — `/transcripts/issue`
+
+- Protected by the backend-aligned `transcripts.issue` permission.
+- Accepts the student GUID and calls `POST /api/v1/transcripts/students/{studentId}/issue`.
+- Displays the returned registration number, issued timestamp, verification code and SHA-256 snapshot digest.
+- Provides copyable verification code and public verification link.
+- Backend rejects issuance when no finalized course grades exist.
+- Each issuance stores an immutable point-in-time academic record snapshot; the UI does not create or edit transcript contents.
+
+### Public verification — `/transcript-verification/{verificationCode}`
+
+- Route is deliberately outside the authenticated admin layout and has no auth/role guard.
+- Calls the backend's anonymous `GET /api/v1/transcripts/verify/{verificationCode}`.
+- Validates the 32-character hexadecimal code shape before requesting verification.
+- Shows authentic/not verified result, registration number, issue date and snapshot digest.
+- Displays only the public verification DTO returned by the backend; it does not expose the student's full academic record.
+
+### Endpoint mapping
+
+| Feature | Endpoint |
+| --- | --- |
+| Student academic record | `GET /api/v1/academic-records/me` |
+| Student appeal history | `GET /api/v1/academic-records/me/grade-appeals/` |
+| Student grade revision requests | `GET /api/v1/academic-records/me/course-grades/{gradeId}/revision-requests` |
+| Student grade revision history | `GET /api/v1/academic-records/me/course-grades/{gradeId}/revisions` |
+| My transcripts | `GET /api/v1/academic-records/me/transcripts/` |
+| Download PDF | `GET /api/v1/academic-records/me/transcripts/{transcriptId}/pdf` |
+| Issue official transcript | `POST /api/v1/transcripts/students/{studentId}/issue` |
+| Public verification | `GET /api/v1/transcripts/verify/{verificationCode}` |
+
+No additional read endpoints were necessary for the requested Phase 14 workflows. Transcript history, PDF generation, immutable snapshots, SHA-256 integrity validation and anonymous verification are all supported by the existing backend. Service contract tests cover the student, registrar and public endpoint shapes.
