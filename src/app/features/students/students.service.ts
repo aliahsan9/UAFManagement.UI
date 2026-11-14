@@ -7,11 +7,11 @@ import { ChangeStudentProgramRequest, CourseAttendanceReport, CourseEnrollment, 
 @Injectable({providedIn:'root'})
 export class StudentsService {
  private readonly http=inject(HttpClient);
- private readonly studentsUrl=${environment.apiBaseUrl}/api/v1/students;
- private readonly offeringsUrl=${environment.apiBaseUrl}/api/v1/course-offerings;
- private readonly attendanceUrl=${environment.apiBaseUrl}/api/v1/attendance;
- private readonly examinationsUrl=${environment.apiBaseUrl}/api/v1/examinations;
- private readonly financeUrl=${environment.apiBaseUrl}/api/v1/finance;
+ private readonly studentsUrl=environment.apiBaseUrl+'/api/v1/students';
+ private readonly offeringsUrl=environment.apiBaseUrl+'/api/v1/course-offerings';
+ private readonly attendanceUrl=environment.apiBaseUrl+'/api/v1/attendance';
+ private readonly examinationsUrl=environment.apiBaseUrl+'/api/v1/examinations';
+ private readonly financeUrl=environment.apiBaseUrl+'/api/v1/finance';
 
  getStudents(query:StudentQuery):Observable<StudentPage>{
   let params=new HttpParams().set('page',query.page).set('pageSize',query.pageSize).set('sortBy',query.sortBy??'registrationNumber').set('sortDirection',query.sortDirection??'asc');
