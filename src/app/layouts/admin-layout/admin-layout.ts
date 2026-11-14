@@ -24,7 +24,7 @@ const ADMIN_NAV:AdminNavSection[]=[
  {label:'EMPLOYEES',links:[{label:'Employee directory',path:'/employees',policies:['Employees.Management'],icon:'♧'}]},
  {label:'ATTENDANCE',links:[
   {label:'Attendance management',path:'/attendance',policies:['Attendance.Management'],icon:'✓'},
-  {label:'Attendance policies',path:'/attendance/policies',policies:['Attendance.PolicyManagement'],icon:'⚙'}]},
+  {label:'Attendance policies',path:'/attendance/policies',policies:['Attendance.PolicyManagement','AcademicCatalog.Management','CourseOfferings.Management'],icon:'⚙'}]},
  {label:'EXAMINATIONS',links:[
   {label:'Examination management',path:'/examinations',policies:['Examinations.Management'],icon:'▣'},
   {label:'Examination approvals',path:'/examinations/approvals',policies:['Examinations.Management','Examinations.Approval'],icon:'✓'}]},
@@ -33,7 +33,7 @@ const ADMIN_NAV:AdminNavSection[]=[
   {label:'Grade finalization',path:'/grading/finalization',policies:['Grading.CourseGradeManagement','CourseOfferings.Management'],icon:'✓'},
   {label:'Grade appeals',path:'/grading/appeals',policies:['Grading.GradeAppealReview'],icon:'↗'},
   {label:'Revision requests',path:'/grading/revisions',policies:['Grading.GradeRevisionRequestManagement'],icon:'↻'},
-  {label:'Revision approvals',path:'/grading/revisions/approvals',policies:['Grading.GradeRevisionApproval'],icon:'✓'}]},
+  {label:'Revision approvals',path:'/grading/revisions/approvals',policies:['Grading.GradeRevisionRequestManagement','Grading.GradeRevisionApproval'],icon:'✓'}]},
  {label:'FINANCE',links:[{label:'Finance & fee management',path:'/finance',policies:['Finance.Management','Analytics.Read'],icon:'◈'}]},
  {label:'ACADEMIC DOCUMENTS',links:[{label:'Issue official transcript',path:'/transcripts/issue',policies:['Transcripts.Issuance'],icon:'▤'}]},
  {label:'SCHEDULING',links:[{label:'Timetable & rooms',path:'/timetable',policies:['Timetable.Management'],icon:'▦'}]}
