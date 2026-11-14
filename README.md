@@ -149,3 +149,32 @@ The query is implemented in the application service and EF Core repository, appl
 The applicant portal uses the applicant-authorized GET /api/v1/applicant/admissions/programs lookup to populate a real active-program selector. The registration-series and staff-created draft forms currently accept the academic program GUID because the staff workflow does not expose a registration-series read endpoint or program-name lookup.
 
 Document uploads use multipart form data and are restricted by the API to PDF/JPEG/PNG up to 10 MB. Submission readiness is derived from the configured required-document list and verified document statuses. The frontend does not claim an application is ready unless the backend readiness endpoint returns canSubmit=true.
+
+
+## Phase 6 — Student management
+
+The student module is implemented against StudentEndpoints.cs and StudentModels.cs. Routes are lazy-loaded and protected by the students.manage permission, which matches the API StudentManagement policy.
+
+### Directory and profile API mapping
+
+| UI capability | API |
+| --- | --- |
+| Paginated directory, search, program/status filters, sorting | GET /api/v1/students/?page=&pageSize=&academicProgramId=&status=&search=&sortBy=&sortDirection= |
+| Student details | GET /api/v1/students/{id} |
+| Create student | POST /api/v1/students/ |
+| Edit personal profile | PUT /api/v1/students/{id}/profile |
+| Change academic program | PUT /api/v1/students/{id}/academic-program |
+| Suspend / reactivate / graduate / withdraw | POST /api/v1/students/{id}/{suspend|reactivate|graduate|withdraw} |
+
+Status values follow the backend enum: Active=1, Suspended=2, Graduated=3, Withdrawn=4. Registration number and enrollment date are set only at creation; profile editing updates full name, email and phone only. Program options use the existing academic-structure API and include only active programs. If program lookup is forbidden, the UI reports that permission gap rather than fabricating options.
+
+### Student profile tabs
+
+- Personal information, registration information and academic program use the student profile response.
+- Academic status history is rendered only when a statusHistory collection is actually returned. The current StudentResponse contract does not expose it.
+- Attendance discovers enrolled offerings, then calls the existing per-offering attendance report API. This is on-demand and requires course-offering and attendance-report permissions.
+- Examination results discover enrolled offerings and fetch only published results from GET /api/v1/examinations/{id}/results. This requires course-offering and examination permissions.
+- Fee account loads independently from GET /api/v1/finance/students/{studentId}/account; finance authorization is enforced by the API.
+- Academic Records does not misuse the self-service /api/v1/academic-records/me/transcripts route for a different student. A staff-authorized studentId-scoped academic-record query is needed before this tab can show another student's transcript history.
+
+Attendance and examination APIs are offering-scoped, not student-scoped. The frontend discovers the student's enrolled offerings first and caps parallel requests to avoid unbounded fan-out. A dedicated student academic-summary endpoint would be more efficient at institutional scale.
