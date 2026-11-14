@@ -4,6 +4,7 @@ import { Router, RouterLink } from '@angular/router';
 import { finalize } from 'rxjs';
 import { AuthService } from '../../../core/services/auth.service';
 import { NotificationService } from '../../../core/services/notification.service';
+import { ServerValidationService } from '../../../core/services/server-validation.service';
 import { portalHomeFor } from '../../../core/authorization/portal-home';
 @Component({
   selector:'app-login', standalone:true, imports:[ReactiveFormsModule,RouterLink],
@@ -23,7 +24,7 @@ import { portalHomeFor } from '../../../core/authorization/portal-home';
   </div>`
 })
 export class Login {
-  private fb=inject(FormBuilder); private auth=inject(AuthService); private router=inject(Router); private notices=inject(NotificationService);
+  private fb=inject(FormBuilder); private auth=inject(AuthService); private router=inject(Router); private notices=inject(NotificationService); private serverValidation=inject(ServerValidationService);
   readonly loading=signal(false); readonly showPassword=signal(false); readonly errorMessage=signal('');
   readonly form=this.fb.nonNullable.group({email:['',[Validators.required,Validators.email]],password:['',Validators.required],remember:[true]});
   submit():void {
@@ -32,7 +33,7 @@ export class Login {
     const {email,password}=this.form.getRawValue();
     this.auth.login({email,password}).pipe(finalize(()=>this.loading.set(false))).subscribe({
       next:user=>{this.notices.show('You are signed in successfully.','success');void this.router.navigateByUrl(portalHomeFor(user));},
-      error:e=>this.errorMessage.set(e.status===401?'The email or password you entered is incorrect.':e.error?.detail??'Unable to sign in right now. Please try again.')
+      error:e=>{if(e.status===400){const result=this.serverValidation.apply(this.form,e);this.errorMessage.set(result.summary[0]??'Review the highlighted fields.');}else this.errorMessage.set(e.status===401?'The email or password you entered is incorrect.':e.error?.detail??'Unable to sign in right now. Please try again.');}
     });
   }
 }
