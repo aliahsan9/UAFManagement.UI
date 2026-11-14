@@ -1,4 +1,4 @@
 import {Component,input,output,signal} from '@angular/core';
-import {SelectOption} from '../../models/ui.models';
+import type {SelectOption} from '../../models/ui.models';
 @Component({selector:'app-filter-dropdown',standalone:true,template:`<label class="form-label small fw-semibold" [attr.for]="id()">{{label()}}</label><select class="form-select" [id]="id()" [value]="value()" [disabled]="disabled()" (change)="change.emit(($any($event.target)).value)"><option value="">{{placeholder()}}</option>@for(option of options();track option.value){<option [value]="option.value" [disabled]="option.disabled">{{option.label}}</option>}</select>`})
 export class FilterDropdown {readonly id=input('filter-dropdown');readonly label=input('Filter');readonly placeholder=input('All');readonly options=input<SelectOption[]>([]);readonly value=input('');readonly disabled=input(false);readonly change=output<string>();}
