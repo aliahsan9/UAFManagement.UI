@@ -5,7 +5,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import { AcademicCatalogService } from '../academic-catalog/academic-catalog.service';
-import { AcademicSession, AcademicSessionStatus, Course } from '../academic-catalog/academic-catalog.models';
+import { AcademicSession, Course, sessionStatusValue, AcademicSessionStatus } from '../academic-catalog/academic-catalog.models';
 import { ConfirmationService } from '../../core/services/confirmation.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { CourseOfferingsService } from './course-offerings.service';
@@ -73,7 +73,7 @@ export class CourseOfferingsPage implements OnInit {
  readonly search=signal('');readonly sessionFilter=signal('');readonly statusFilter=signal('');readonly formOpen=signal(false);readonly editingId=signal<string|null>(null);
  readonly statusOptions=OFFERING_STATUS_OPTIONS;readonly draft=CourseOfferingStatus.Draft;readonly published=CourseOfferingStatus.Published;
  readonly activeCourses=computed(()=>this.courses().filter(x=>x.isActive));
- readonly availableSessions=computed(()=>this.sessions().filter(x=>Number(x.status)===AcademicSessionStatus.Planned||Number(x.status)===AcademicSessionStatus.Active));
+ readonly availableSessions=computed(()=>this.sessions().filter(x=>sessionStatusValue(x.status)===AcademicSessionStatus.Planned||sessionStatusValue(x.status)===AcademicSessionStatus.Active));
  readonly referencesReady=computed(()=>this.activeCourses().length>0&&this.availableSessions().length>0);
  readonly filteredOfferings=computed(()=>{const term=this.search().trim().toLowerCase();return this.offerings().filter(o=>(!this.sessionFilter()||o.academicSessionId===this.sessionFilter())&&(!this.statusFilter()||this.statusValue(o)===Number(this.statusFilter()))&&(!term||[this.courseName(o.courseId),this.courseCode(o.courseId),o.section,this.sessionName(o.academicSessionId)].some(v=>v.toLowerCase().includes(term))));});
  readonly totalEnrolled=computed(()=>this.offerings().reduce((sum,o)=>sum+o.enrolledCount,0));
