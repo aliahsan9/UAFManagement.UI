@@ -4,8 +4,10 @@ import { provideRouter, withComponentInputBinding, withInMemoryScrolling } from 
 import { routes } from './app.routes';
 import { authInterceptor } from './core/interceptors/auth.interceptor';
 import { errorInterceptor } from './core/interceptors/error.interceptor';
+import { correlationIdInterceptor } from './core/interceptors/correlation-id.interceptor';
+import { idempotencyInterceptor } from './core/interceptors/idempotency.interceptor';
 export const appConfig: ApplicationConfig = { providers: [
  provideBrowserGlobalErrorListeners(),
  provideRouter(routes, withComponentInputBinding(), withInMemoryScrolling({scrollPositionRestoration:'top'})),
- provideHttpClient(withInterceptors([authInterceptor,errorInterceptor]))
+ provideHttpClient(withInterceptors([correlationIdInterceptor,authInterceptor,idempotencyInterceptor,errorInterceptor]))
 ] };

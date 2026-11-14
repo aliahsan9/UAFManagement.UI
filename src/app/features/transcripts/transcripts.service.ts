@@ -1,19 +1,15 @@
-import { HttpClient } from '@angular/common/http';
 import { Injectable,inject } from '@angular/core';
 import { Observable } from 'rxjs';
-import { environment } from '../../../environments/environment';
+import { ApiClient } from '../../core/services/api-client.service';
+import { createIdempotencyKey } from '../../core/http/http-context.tokens';
 import { StudentAcademicRecord } from '../grading/grading.models';
 import { TranscriptIssued,TranscriptListItem,TranscriptVerification } from './transcripts.models';
-
 @Injectable({providedIn:'root'})
 export class TranscriptsService {
- private readonly http=inject(HttpClient);
- private readonly base=environment.apiBaseUrl;
- private readonly records=this.base+'/api/v1/academic-records';
- private readonly transcripts=this.base+'/api/v1/transcripts';
- getMyAcademicRecord():Observable<StudentAcademicRecord>{return this.http.get<StudentAcademicRecord>(this.records+'/me');}
- getMine():Observable<TranscriptListItem[]>{return this.http.get<TranscriptListItem[]>(this.records+'/me/transcripts/');}
- downloadMyPdf(id:string):Observable<Blob>{return this.http.get(this.records+'/me/transcripts/'+encodeURIComponent(id)+'/pdf',{responseType:'blob'});}
- issueOfficial(studentId:string):Observable<TranscriptIssued>{return this.http.post<TranscriptIssued>(this.transcripts+'/students/'+encodeURIComponent(studentId)+'/issue',null);}
- verify(code:string):Observable<TranscriptVerification>{return this.http.get<TranscriptVerification>(this.transcripts+'/verify/'+encodeURIComponent(code));}
+ private readonly api=inject(ApiClient);
+ getMyAcademicRecord():Observable<StudentAcademicRecord>{return this.api.get<StudentAcademicRecord>('/api/v1/academic-records/me');}
+ getMine():Observable<TranscriptListItem[]>{return this.api.get<TranscriptListItem[]>('/api/v1/academic-records/me/transcripts/');}
+ downloadMyPdf(id:string):Observable<Blob>{return this.api.getBlob('/api/v1/academic-records/me/transcripts/'+encodeURIComponent(id)+'/pdf');}
+ issueOfficial(studentId:string,key=createIdempotencyKey()):Observable<TranscriptIssued>{return this.api.post<TranscriptIssued>('/api/v1/transcripts/students/'+encodeURIComponent(studentId)+'/issue',null,{idempotencyKey:key});}
+ verify(code:string):Observable<TranscriptVerification>{return this.api.get<TranscriptVerification>('/api/v1/transcripts/verify/'+encodeURIComponent(code));}
 }

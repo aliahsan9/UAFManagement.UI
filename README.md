@@ -644,3 +644,28 @@ The application now has a reusable, standalone component library under `src/app/
 ### Shared component tests
 
 Vitest coverage includes table sorting, filtering, pagination and loading/empty rendering, plus status label/tone behavior and backwards compatibility for active/inactive badges.
+
+
+## Phase 17 — Backend integration and production readiness
+
+The feature-scoped services remain the owners of module contracts and DTOs. Shared `ApiClient` centralizes transport/query serialization and explicit idempotency support; existing feature models remain endpoint-specific.
+
+- Access tokens stay in memory. Refresh tokens remain HttpOnly cookies. A protected 401 triggers one shared refresh attempt and one request retry; failed refresh returns the user to sign-in. 403 is surfaced and route guards continue to enforce policy-aware navigation for UX only.
+- `X-Correlation-ID` is attached to requests and response IDs are retained for diagnostics. The API CORS policy supports this header and exposes it to the browser.
+- `Idempotency-Key` is opt-in and validated as 1–128 printable ASCII characters. Finance mutations, admission submission/review/decision/conversion commands, attendance session creation/finalization and official transcript issuance use it. A caller can pass a stable key to reuse across a retry; never reuse a key with a different payload.
+- `ServerValidationService` maps backend Problem Details field errors onto Reactive Form controls and returns unmatched messages for a form summary.
+- HTTP 409 advises reloading stale data; HTTP 429 shows retry guidance and displays `Retry-After` when exposed by CORS. The current backend exposes `X-Correlation-ID` and `Idempotency-Replayed`; add `Retry-After` to the backend CORS exposed-header list if the browser should read that value. Network/server failures include the correlation reference where available.
+- Existing module services and DTOs remain feature-scoped. Admissions staff list already uses supported page/pageSize/status/program/search query fields. Use DataTable server-side mode only where an endpoint supports its documented paging, sorting and filtering contract.
+- Existing FormData upload and Blob download endpoints are retained. Browser-side file checks are UX only; API validation remains mandatory.
+
+### System health
+
+- Added a SuperAdmin-only `/system/health` route and navigation link.
+- Calls `/health/live`, `/health/ready` and `/health`; displays backend status and reported checks such as SQL Server readiness.
+- HTTP 503 is treated as a diagnostic response when the backend returns its health report body. Network/CORS errors are shown as unreachable. The page does not expose secrets or attempt remediation.
+
+### Playwright E2E
+
+- Isolated Playwright workspace under `e2e/` avoids adding browser tooling to the Angular runtime dependencies.
+- GitHub Actions installs Chromium and tests accessible login controls and client-side validation.
+- Current browser tests are smoke tests; authenticated workflows require a seeded test API identity/environment before they can be reliably exercised.

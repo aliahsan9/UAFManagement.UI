@@ -67,6 +67,7 @@ export const routes:Routes=[
  // Administration workspace. Individual modules still require their own policies.
  {path:'',canActivate:[authGuard,roleGuard],canActivateChild:[roleGuard],data:{roles:['SuperAdmin','DepartmentAdmin','Registrar','FinanceOfficer','HRManager']},loadComponent:()=>import('./layouts/admin-layout/admin-layout').then(m=>m.AdminLayout),children:[
   {path:'dashboard',loadComponent:()=>import('./features/portals/portal-dashboard-page').then(m=>m.PortalDashboardPage),data:{portal:'administration'}},
+  {path:'system/health',canActivate:[roleGuard],loadComponent:()=>import('./features/system-health/system-health-page').then(m=>m.SystemHealthPage),data:{roles:['SuperAdmin']}},
   {path:'academic-structure/universities',loadComponent:()=>import('./features/academic-structure/academic-structure-page').then(m=>m.AcademicStructurePage),data:{entity:'universities',policies:academicPolicies}},
   {path:'academic-structure/campuses',loadComponent:()=>import('./features/academic-structure/academic-structure-page').then(m=>m.AcademicStructurePage),data:{entity:'campuses',policies:academicPolicies}},
   {path:'academic-structure/faculties',loadComponent:()=>import('./features/academic-structure/academic-structure-page').then(m=>m.AcademicStructurePage),data:{entity:'faculties',policies:academicPolicies}},

@@ -3,25 +3,5 @@ import { inject } from '@angular/core';
 import { catchError, finalize, throwError } from 'rxjs';
 import { NotificationService } from '../services/notification.service';
 import { LoadingService } from '../services/loading.service';
-export const errorInterceptor: HttpInterceptorFn = (request, next) => {
-  const notices = inject(NotificationService);
-  const loading = inject(LoadingService);
-  loading.begin();
-  return next(request).pipe(
-    catchError((error: unknown) => {
-      const isCredentialForm = /\/api\/v1\/auth\/(login|register)/.test(request.url);
-      if (error instanceof HttpErrorResponse && !isCredentialForm) {
-        const messages: Record<number,string> = {
-          400:'Some information is invalid. Review your input.', 401:'Your session has expired. Sign in again.',
-          403:'You do not have permission to perform this action.', 404:'The requested resource was not found.',
-          409:'This action conflicts with the current record state.', 429:'Too many requests. Please try again shortly.',
-          500:'The server encountered an error. Please try again later.'
-        };
-        if (error.status === 0) notices.show('Unable to reach the server. Check your connection.', 'error');
-        else notices.show(messages[error.status] ?? 'An unexpected error occurred.', 'error');
-      }
-      return throwError(() => error);
-    }),
-    finalize(() => loading.end())
-  );
-};
+function retryMessage(error:HttpErrorResponse):string{const value=error.headers.get('Retry-After');if(!value)return 'The API rate limit has been reached. Please wait before trying again.';const seconds=Number(value);if(Number.isFinite(seconds))return 'The API rate limit has been reached. Try again in about '+Math.max(1,seconds)+' second(s).';const date=new Date(value);return Number.isNaN(date.getTime())?'The API rate limit has been reached. Please wait before trying again.':'The API rate limit has been reached. Try again after '+date.toLocaleTimeString()+'.';}
+export const errorInterceptor:HttpInterceptorFn=(request,next)=>{const notices=inject(NotificationService);const loading=inject(LoadingService);loading.begin();return next(request).pipe(catchError((error:unknown)=>{const isCredentialForm=/\/api\/v1\/auth\/(login|register)/.test(request.url);const isHealthCheck=/\/health(\/|$)/.test(request.url);if(error instanceof HttpErrorResponse&&!isCredentialForm&&!isHealthCheck){const messages:Record<number,string>={403:'You do not have permission to perform this action.',404:'The requested resource was not found.',409:error.error?.detail??'This action conflicts with the current record state. Reload the record before trying again.',429:retryMessage(error),500:error.error?.detail??'The server encountered an error. Please try again later.'};if(error.status===0)notices.show('Unable to reach the API. Check your connection and API availability.','error');else if(error.status===400&&error.error?.detail&&!error.error?.errors)notices.show(error.error.detail,'error');else if(error.status!==401&&error.status!==400){let message=messages[error.status]??(error.status>=500?'The API is temporarily unavailable.':'');const correlationId=error.headers.get('X-Correlation-ID')??request.headers.get('X-Correlation-ID');if(error.status>=500&&correlationId)message+=' Reference ID: '+correlationId;if(message)notices.show(message,error.status===429?'warning':'error');}}return throwError(()=>error);}),finalize(()=>loading.end()));};
